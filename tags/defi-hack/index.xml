@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Defi Hack on Ashley&#39;s Blog</title>
+        <link>https://ashirleyshe.github.io/tags/defi-hack/</link>
+        <description>Recent content in Defi Hack on Ashley&#39;s Blog</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en-us</language>
+        <lastBuildDate>Wed, 12 Oct 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://ashirleyshe.github.io/tags/defi-hack/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>[Defi Hack] 2022-10-02 TransitSwap 安全事件分析</title>
+        <link>https://ashirleyshe.github.io/p/defi-hack-2022-10-02-transitswap-%E5%AE%89%E5%85%A8%E4%BA%8B%E4%BB%B6%E5%88%86%E6%9E%90/</link>
+        <pubDate>Wed, 12 Oct 2022 00:00:00 +0000</pubDate>
+        
+        <guid>https://ashirleyshe.github.io/p/defi-hack-2022-10-02-transitswap-%E5%AE%89%E5%85%A8%E4%BA%8B%E4%BB%B6%E5%88%86%E6%9E%90/</guid>
+        <description>&lt;ul&gt;
+&lt;li&gt;日期: 2022/10/02&lt;/li&gt;
+&lt;li&gt;金額：＄21M&lt;/li&gt;
+&lt;li&gt;攻擊者：0xcc3d51c137e2360a34d58840e65a501cfc33ae7d&lt;/li&gt;
+&lt;li&gt;攻擊交易：&lt;a class=&#34;link&#34; href=&#34;https://bscscan.com/tx/0x4d988ccde0caa266d88b459b710a7fbb6a44d5d2bccf91ecf4b79ba24564877c&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://bscscan.com/tx/0x4d988ccde0caa266d88b459b710a7fbb6a44d5d2bccf91ecf4b79ba24564877c&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Root cause: No data validation&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote class=&#34;twitter-tweet&#34;&gt;&lt;p lang=&#34;en&#34; dir=&#34;ltr&#34;&gt;1/ Transit Swap &lt;a href=&#34;https://twitter.com/TransitFinance?ref_src=twsrc%5Etfw&#34;&gt;@TransitFinance&lt;/a&gt; was attacked. There are multiple attack txs(&lt;a href=&#34;https://t.co/OPEeM3UaK9&#34;&gt;https://t.co/OPEeM3UaK9&lt;/a&gt;) &lt;br&gt;Both 0xed1afc8c4604958c2f38a3408fa63b32e737c428 and 0x8785bb8deae13783b24d7afe250d42ea7d7e9d72 are  contracts created by Transit Swap, while these contracts are not open source.&lt;/p&gt;&amp;mdash; BlockSec (@BlockSecTeam) &lt;a href=&#34;https://twitter.com/BlockSecTeam/status/1576428812514250753?ref_src=twsrc%5Etfw&#34;&gt;October 2, 2022&lt;/a&gt;&lt;/blockquote&gt;
+&lt;script async src=&#34;https://platform.twitter.com/widgets.js&#34; charset=&#34;utf-8&#34;&gt;&lt;/script&gt;
+
+&lt;h2 id=&#34;transit-swap&#34;&gt;Transit Swap&lt;/h2&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;http://swap.transit.finance/#/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Transit Swap&lt;/a&gt; 是一個跨鏈聚合閃兌平台，各大主流公鏈幾乎都有支援，雖然網頁上掛著由 PeckShield 提供安全审计，不過 PeckShield 回應並無審計這個部分。&lt;/p&gt;
+&lt;h2 id=&#34;兌換流程&#34;&gt;兌換流程&lt;/h2&gt;
+&lt;p&gt;執行 swap 時，主要牽涉到3個合約：&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='move the bytes to see the truth!
+code: https://github.com/MetaTrustLabs/ctf/tree/master/bytesMove
+you need to crack this file and find the flag.
+tips: This is a sui bytecode
+To disassemble the moveBytes.mv file in the MetaTrust CTF, we used the sui client command-line interface. The sui move disassemble command allowed us to view the assembly code for the Move bytecode.
+1 sui move disassemble moveBytes.mv If you&amp;rsquo;re interested in viewing the assembly code for the moveBytes.'><title>Metatrust CTF Writeup - BytesMove</title>
+
+<link rel='canonical' href='https://ashirleyshe.github.io/p/metatrust-ctf-writeup-bytesmove/'>
+
+<link rel="stylesheet" href="/scss/style.min.ac77dcf8b111b51da39a92990f431923f210f3876d85798a2125667f96dc33a4.css"><meta property='og:title' content='Metatrust CTF Writeup - BytesMove'>
+<meta property='og:description' content='move the bytes to see the truth!
+code: https://github.com/MetaTrustLabs/ctf/tree/master/bytesMove
+you need to crack this file and find the flag.
+tips: This is a sui bytecode
+To disassemble the moveBytes.mv file in the MetaTrust CTF, we used the sui client command-line interface. The sui move disassemble command allowed us to view the assembly code for the Move bytecode.
+1 sui move disassemble moveBytes.mv If you&amp;rsquo;re interested in viewing the assembly code for the moveBytes.'>
+<meta property='og:url' content='https://ashirleyshe.github.io/p/metatrust-ctf-writeup-bytesmove/'>
+<meta property='og:site_name' content='A'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='CTF' /><meta property='article:published_time' content='2023-09-18T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2023-09-18T00:00:00&#43;00:00'/>
+<meta name="twitter:title" content="Metatrust CTF Writeup - BytesMove">
+<meta name="twitter:description" content="move the bytes to see the truth!
+code: https://github.com/MetaTrustLabs/ctf/tree/master/bytesMove
+you need to crack this file and find the flag.
+tips: This is a sui bytecode
+To disassemble the moveBytes.mv file in the MetaTrust CTF, we used the sui client command-line interface. The sui move disassemble command allowed us to view the assembly code for the Move bytecode.
+1 sui move disassemble moveBytes.mv If you&amp;rsquo;re interested in viewing the assembly code for the moveBytes.">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "dark");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/wanhsin_hu366a5cf9d6ed6a7819b52901816f26e5_1994279_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🐱</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">A</a></h1>
+            <h2 class="site-description">Fat Cat</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/about/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+                <li id="i18n-switch">  
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
+                        
+                            <option value="https://ashirleyshe.github.io/" selected>English</option>
+                        
+                            <option value="https://ashirleyshe.github.io/zh-tw/" >繁體中文</option>
+                        
+                    </select>
+                </li>
+            
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>Dark Mode</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+<main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/ctf/" >
+                CTF
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/metatrust-ctf-writeup-bytesmove/">Metatrust CTF Writeup - BytesMove</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Sep 18, 2023</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    4 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+</header>
+
+    <section class="article-content">
+    
+    
+    <blockquote>
+<p>move the bytes to see the truth!<br>
+code: <a class="link" href="https://github.com/MetaTrustLabs/ctf/tree/master/bytesMove"  target="_blank" rel="noopener"
+    >https://github.com/MetaTrustLabs/ctf/tree/master/bytesMove</a><br>
+you need to crack this file and find the flag.<br>
+tips: This is a sui bytecode</p>
+</blockquote>
+<p>To disassemble the moveBytes.mv file in the MetaTrust CTF, we used the sui client command-line interface. The sui move disassemble command allowed us to view the assembly code for the Move bytecode.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sui move disassemble moveBytes.mv
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>If you&rsquo;re interested in viewing the assembly code for the moveBytes.mv file, you can check out the code at the following link:
+<a class="link" href="https://gist.github.com/ashirleyshe/04a5ed08727a5b06fcda2fc545ed56b8"  target="_blank" rel="noopener"
+    >https://gist.github.com/ashirleyshe/04a5ed08727a5b06fcda2fc545ed56b8</a></p>
+<p>The file contains several functions, including compute, byte_to_u64, slice, and solve. The byte_to_u64 and slice functions are not particularly important.</p>
+<p>Check the value of the constants:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Constants [
+</span></span><span class="line"><span class="cl">	0 =&gt; u64: 0000000000000000
+</span></span><span class="line"><span class="cl">	1 =&gt; u64: 0100000000000000
+</span></span><span class="line"><span class="cl">	2 =&gt; vector&lt;u64&gt;: 00
+</span></span><span class="line"><span class="cl">	3 =&gt; vector&lt;u8&gt;: 046374667b     // ctf{
+</span></span><span class="line"><span class="cl">	4 =&gt; vector&lt;u8&gt;: 017d           // }
+</span></span><span class="line"><span class="cl">	5 =&gt; vector&lt;u64&gt;: 20c0000000000000000c000000000000004500000000000000c200000000000000b800000000000000d600000000000000780000000000000010000000000000003a000000000000000b00000000000000f9000000000000004c00000000000000ae00000000000000ba00000000000000a20000000000000083000000000000004d00000000000000d100000000000000f200000000000000a7000000000000000e00000000000000df000000000000002e0000000000000047000000000000000100000000000000a00000000000000080000000000000001900000000000000f500000000000000260000000000000086000000000000004a00000000000000
+</span></span><span class="line"><span class="cl">    // [192, 12, 69, 194, 184, 214, 120, 16, 58, 11, 249, 76, 174, 186, 162, 131, 77, 209, 242, 167, 14, 223, 46, 71, 1, 160, 128, 25, 245, 38, 134, 74]
+</span></span><span class="line"><span class="cl">]
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The <code>solve</code> function is the entry point for the program and accepts a vector as its argument, which represents the flag. The function checks the format of the input, computes a value using the compute function, and then asserts that the input is equal to the ciphertext value.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">entry public solve(Arg0: vector&lt;u8&gt;) {
+</span></span><span class="line"><span class="cl">    ...
+</span></span><span class="line"><span class="cl">    check the format of the input
+</span></span><span class="line"><span class="cl">    compute
+</span></span><span class="line"><span class="cl">    assert the input is equal to the ciphertext (constants 5)
+</span></span><span class="line"><span class="cl">}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>A loop, check <code>i &lt; 32</code>.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">	115: LdU64(0)
+</span></span><span class="line"><span class="cl">	116: StLoc[4](loc3: u64)
+</span></span><span class="line"><span class="cl">B14:
+</span></span><span class="line"><span class="cl">	117: CopyLoc[4](loc3: u64)
+</span></span><span class="line"><span class="cl">	118: LdU64(32)
+</span></span><span class="line"><span class="cl">	119: Lt
+</span></span><span class="line"><span class="cl">	120: BrFalse(163)
+</span></span><span class="line"><span class="cl">    ...
+</span></span><span class="line"><span class="cl">    158: MoveLoc[4](loc3: u64)
+</span></span><span class="line"><span class="cl">	159: LdU64(1)
+</span></span><span class="line"><span class="cl">	160: Add
+</span></span><span class="line"><span class="cl">	161: StLoc[4](loc3: u64)
+</span></span><span class="line"><span class="cl">	162: Branch(117)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>An inner loop, check <code>j &lt; 8</code>.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">	124: LdU64(0)
+</span></span><span class="line"><span class="cl">	125: StLoc[5](loc4: u64)
+</span></span><span class="line"><span class="cl">B17:
+</span></span><span class="line"><span class="cl">	126: CopyLoc[5](loc4: u64)
+</span></span><span class="line"><span class="cl">	127: LdU64(8)
+</span></span><span class="line"><span class="cl">	128: Lt
+</span></span><span class="line"><span class="cl">	129: BrFalse(155)
+</span></span><span class="line"><span class="cl">    ...
+</span></span><span class="line"><span class="cl">    150: MoveLoc[5](loc4: u64)
+</span></span><span class="line"><span class="cl">	151: LdU64(1)
+</span></span><span class="line"><span class="cl">	152: Add
+</span></span><span class="line"><span class="cl">	153: StLoc[5](loc4: u64)
+</span></span><span class="line"><span class="cl">	154: Branch(126)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The compute function takes the i/4th element of the vector as its first argument and the 2290631716 as its second argument.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">B19:
+</span></span><span class="line"><span class="cl">	131: MutBorrowLoc[19](loc18: vector&lt;u64&gt;)
+</span></span><span class="line"><span class="cl">	132: CopyLoc[4](loc3: u64)
+</span></span><span class="line"><span class="cl">	133: LdU64(4)
+</span></span><span class="line"><span class="cl">	134: Div
+</span></span><span class="line"><span class="cl">	135: VecMutBorrow(2)
+</span></span><span class="line"><span class="cl">	136: StLoc[10](loc9: &amp;mut u64)
+</span></span><span class="line"><span class="cl">	137: CopyLoc[10](loc9: &amp;mut u64)
+</span></span><span class="line"><span class="cl">	138: ReadRef
+</span></span><span class="line"><span class="cl">	139: LdU64(2290631716)
+</span></span><span class="line"><span class="cl">	140: Call compute(u64, u64): u64 * u64      // compute(vec[i/4], 2290631716)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">    141: StLoc[8](loc7: u64)
+</span></span><span class="line"><span class="cl">	142: MoveLoc[10](loc9: &amp;mut u64)
+</span></span><span class="line"><span class="cl">	143: WriteRef
+</span></span><span class="line"><span class="cl">	144: MoveLoc[20](loc19: u64)
+</span></span><span class="line"><span class="cl">	145: LdU8(1)
+</span></span><span class="line"><span class="cl">	146: Shl                        // var &lt;&lt; 1
+</span></span><span class="line"><span class="cl">	147: MoveLoc[8](loc7: u64)
+</span></span><span class="line"><span class="cl">	148: Xor
+</span></span><span class="line"><span class="cl">	149: StLoc[20](loc19: u64)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>I construct the script like this:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">output = []
+</span></span><span class="line"><span class="cl">for i in range(32):
+</span></span><span class="line"><span class="cl">    tmp = 0
+</span></span><span class="line"><span class="cl">    for j in range(8):
+</span></span><span class="line"><span class="cl">        (vec[i/4], out) = compute(vec[i/4], 2290631716)
+</span></span><span class="line"><span class="cl">        tmp = (tmp &lt;&lt; 1) ^ out
+</span></span><span class="line"><span class="cl">    output.append(tmp)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Finally, you&rsquo;ll find it is a LFSR.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">def compute(arg0, arg1):
+</span></span><span class="line"><span class="cl">    loc0 = (arg0 &lt;&lt; 1) &amp; 4294967295
+</span></span><span class="line"><span class="cl">    loc1 = arg0 &amp; arg1 &amp; 4294967295
+</span></span><span class="line"><span class="cl">    loc2 = 0
+</span></span><span class="line"><span class="cl">    while loc1 != 0:
+</span></span><span class="line"><span class="cl">        loc2 ^= (loc1 &amp; 1)
+</span></span><span class="line"><span class="cl">        loc1 &gt;&gt;= 1
+</span></span><span class="line"><span class="cl">    loc0 ^= loc2
+</span></span><span class="line"><span class="cl">    return (loc0, lco2)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>To crack the flag, I wrote a Python script:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="n">ct</span> <span class="o">=</span> <span class="p">[</span><span class="mi">192</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">69</span><span class="p">,</span> <span class="mi">194</span><span class="p">,</span> <span class="mi">184</span><span class="p">,</span> <span class="mi">214</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">58</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">249</span><span class="p">,</span> <span class="mi">76</span><span class="p">,</span> <span class="mi">174</span><span class="p">,</span> <span class="mi">186</span><span class="p">,</span> <span class="mi">162</span><span class="p">,</span> <span class="mi">131</span><span class="p">,</span> <span class="mi">77</span><span class="p">,</span> <span class="mi">209</span><span class="p">,</span> <span class="mi">242</span><span class="p">,</span> <span class="mi">167</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">223</span><span class="p">,</span> <span class="mi">46</span><span class="p">,</span> <span class="mi">71</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">160</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">245</span><span class="p">,</span> <span class="mi">38</span><span class="p">,</span> <span class="mi">134</span><span class="p">,</span> <span class="mi">74</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">rev_compute</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">mask</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">curr</span> <span class="o">=</span> <span class="n">vec</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">    <span class="n">b</span> <span class="o">=</span> <span class="n">vec</span> <span class="o">&amp;</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">    <span class="n">vec</span> <span class="o">&gt;&gt;=</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="n">mask</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">mask</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="n">b</span> <span class="o">^=</span> <span class="n">vec</span> <span class="o">&amp;</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">        <span class="n">vec</span> <span class="o">&gt;&gt;=</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">        <span class="n">mask</span> <span class="o">&gt;&gt;=</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">curr</span> <span class="o">|</span> <span class="p">(</span><span class="n">b</span> <span class="o">&lt;&lt;</span> <span class="mi">31</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">mask</span> <span class="o">=</span> <span class="mi">2290631716</span>
+</span></span><span class="line"><span class="cl"><span class="n">s0</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">ct</span><span class="p">[:</span><span class="mi">4</span><span class="p">],</span> <span class="s2">&#34;big&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">s1</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">ct</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">8</span><span class="p">],</span> <span class="s2">&#34;big&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">s2</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">ct</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">12</span><span class="p">],</span> <span class="s2">&#34;big&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">s3</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">ct</span><span class="p">[</span><span class="mi">12</span><span class="p">:</span><span class="mi">16</span><span class="p">],</span> <span class="s2">&#34;big&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">s4</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">ct</span><span class="p">[</span><span class="mi">16</span><span class="p">:</span><span class="mi">20</span><span class="p">],</span> <span class="s2">&#34;big&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">s5</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">ct</span><span class="p">[</span><span class="mi">20</span><span class="p">:</span><span class="mi">24</span><span class="p">],</span> <span class="s2">&#34;big&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">s6</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">ct</span><span class="p">[</span><span class="mi">24</span><span class="p">:</span><span class="mi">28</span><span class="p">],</span> <span class="s2">&#34;big&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">s7</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">ct</span><span class="p">[</span><span class="mi">28</span><span class="p">:</span><span class="mi">32</span><span class="p">],</span> <span class="s2">&#34;big&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">32</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">s0</span> <span class="o">=</span> <span class="n">rev_compute</span><span class="p">(</span><span class="n">s0</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">s1</span> <span class="o">=</span> <span class="n">rev_compute</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">s2</span> <span class="o">=</span> <span class="n">rev_compute</span><span class="p">(</span><span class="n">s2</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">s3</span> <span class="o">=</span> <span class="n">rev_compute</span><span class="p">(</span><span class="n">s3</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">s4</span> <span class="o">=</span> <span class="n">rev_compute</span><span class="p">(</span><span class="n">s4</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">s5</span> <span class="o">=</span> <span class="n">rev_compute</span><span class="p">(</span><span class="n">s5</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">s6</span> <span class="o">=</span> <span class="n">rev_compute</span><span class="p">(</span><span class="n">s6</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">s7</span> <span class="o">=</span> <span class="n">rev_compute</span><span class="p">(</span><span class="n">s7</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="n">s7</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s2">&#34;big&#34;</span><span class="p">)</span> <span class="o">+</span> <span class="n">s6</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s2">&#34;big&#34;</span><span class="p">)</span> <span class="o">+</span> <span class="n">s2</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s2">&#34;big&#34;</span><span class="p">)</span> <span class="o">+</span> <span class="n">s5</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s2">&#34;big&#34;</span><span class="p">)</span> <span class="o">+</span> <span class="n">s4</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s2">&#34;big&#34;</span><span class="p">)</span> <span class="o">+</span> <span class="n">s3</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s2">&#34;big&#34;</span><span class="p">)</span> <span class="o">+</span> <span class="n">s1</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s2">&#34;big&#34;</span><span class="p">)</span> <span class="o">+</span> <span class="n">s0</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s2">&#34;big&#34;</span><span class="p">))</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/ctf/">CTF</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/hats-finance-ctf-2-writeup/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Hats Finance CTF 2 WriteUp</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ethernaut-writeup/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Ethernaut Writeup</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "ashley-10" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2023 A
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.13.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+    
+
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

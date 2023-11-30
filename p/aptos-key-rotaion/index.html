@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Overview 在本文中，我們將深入探討 Aptos 密鑰輪換的概念及其重要性。在開始之前，讓我們先了解什麼是 Aptos 帳戶、公鑰和私鑰的作用。當私鑰洩漏時，你的帳戶就可能遭到攻擊，但若想保留原有帳戶並確保資產安全，就需要使用密鑰輪換技術。Aptos 帳戶支持密鑰輪換，讓你更改私鑰而不必創建新帳戶，繼而保留原有帳戶的資產和身份。
+接下來，我們將介紹如何使用 Aptos cli 及 Python SDK 完成密鑰輪換，讓你能夠隨時保持帳戶資產及身份的安全。
+什麼是帳戶（account）？ 每個 Aptos 帳戶代表著區塊鏈上一個可以發送交易的實體，並由特定的 32 字節帳戶地址識別。這個帳戶是 Move 模組和 Move 資源的容器，可以包含區塊鏈資產（例如 coin 和 NFT）。這些資產在區塊鏈帳戶中表示為資源，同時帳戶也可以執行各種操作，例如將資源發送給其他人。就像在 Web2 的世界中，你的電子郵件地址代表著你的電子郵件帳戶，而在 Aptos 區塊鏈中，帳戶地址代表著帳戶本身，你可以透過這個地址進行收發資產等操作。
+公鑰（public key）、私鑰（private key） 私鑰在 Aptos 區塊鏈與其他區塊鏈一樣，可以用來簽署交易以使其被認可和驗證，就像在現實生活中需要簽名或輸入密碼才能夠轉帳。簽署過後的交易才能夠對你的帳戶資產進行更改，但是只有擁有私鑰的人才能夠簽署這筆交易，因此私鑰是非常重要且敏感的一組數據。
+在其他區塊鏈上，你的公開身份即為私鑰對應的公鑰，地址可以從公鑰被推算出來，公鑰也被用來驗證簽章。然而，Aptos 支援密鑰輪換，導致公鑰可能會發生變化，因此使用地址來代表帳戶。傳統上，每個帳戶都有一個特定的地址作為其識別符號，而且這個地址是不會改變的。在 Aptos 中，即使您更改了身份驗證密鑰（其中包含公鑰），帳戶地址仍然是唯一的，並且不會發生變化。
+身份驗證密鑰（authentication key） Aptos 區塊鏈支援單簽和多簽帳戶。多簽帳戶允許多個用戶共同執行數位簽章來管理帳戶資產。例如，想像一個擁有兩把鎖和兩把鑰匙的保險箱，一把鑰匙由 Alice 持有，另一把則由 Bob 掌管。打開此保險箱的唯一辦法就是兩個人同時提供鑰匙開鎖，只有其中一把鑰匙時則無法打開。多簽帳戶與此類似，它是代表多方的單一帳戶，所有發生的交易都需要所有參與方的簽名，也可以被設定一個閾值，舉個例子，2-of-3 代表三位中只要有兩個簽署即可完成交易。
+多簽帳戶使用多個（私鑰，公鑰）密鑰對，沒有單個公鑰會代表這個帳戶。因此，我們需要一個代表此帳戶的密鑰，以便封裝多簽帳戶中所有用戶的公鑰，這個代表此帳戶的密鑰也就是所謂的身份驗證密鑰。
+身份驗證密鑰是表示多簽帳戶中所有用戶的一種方式。簡而言之，身份驗證密鑰是通過連接所有參與用戶的公鑰的串聯散列創建的。
+1 auth_key = sha3-256(pubkey_1 | . . . | pubkey_n | K | 0x01) 其中K是驗證交易所需的簽名閾值，0x01為 1-byte 多簽方案標識符。
+對於單簽帳戶，也存在身份驗證密鑰，單簽帳戶的身份驗證密鑰只封裝了一個公鑰來代表帳戶，這樣做是為了在所有類型的帳戶上保持一致性。'><title>Aptos Key Rotaion</title>
+
+<link rel='canonical' href='https://ashirleyshe.github.io/p/aptos-key-rotaion/'>
+
+<link rel="stylesheet" href="/scss/style.min.ac77dcf8b111b51da39a92990f431923f210f3876d85798a2125667f96dc33a4.css"><meta property='og:title' content='Aptos Key Rotaion'>
+<meta property='og:description' content='Overview 在本文中，我們將深入探討 Aptos 密鑰輪換的概念及其重要性。在開始之前，讓我們先了解什麼是 Aptos 帳戶、公鑰和私鑰的作用。當私鑰洩漏時，你的帳戶就可能遭到攻擊，但若想保留原有帳戶並確保資產安全，就需要使用密鑰輪換技術。Aptos 帳戶支持密鑰輪換，讓你更改私鑰而不必創建新帳戶，繼而保留原有帳戶的資產和身份。
+接下來，我們將介紹如何使用 Aptos cli 及 Python SDK 完成密鑰輪換，讓你能夠隨時保持帳戶資產及身份的安全。
+什麼是帳戶（account）？ 每個 Aptos 帳戶代表著區塊鏈上一個可以發送交易的實體，並由特定的 32 字節帳戶地址識別。這個帳戶是 Move 模組和 Move 資源的容器，可以包含區塊鏈資產（例如 coin 和 NFT）。這些資產在區塊鏈帳戶中表示為資源，同時帳戶也可以執行各種操作，例如將資源發送給其他人。就像在 Web2 的世界中，你的電子郵件地址代表著你的電子郵件帳戶，而在 Aptos 區塊鏈中，帳戶地址代表著帳戶本身，你可以透過這個地址進行收發資產等操作。
+公鑰（public key）、私鑰（private key） 私鑰在 Aptos 區塊鏈與其他區塊鏈一樣，可以用來簽署交易以使其被認可和驗證，就像在現實生活中需要簽名或輸入密碼才能夠轉帳。簽署過後的交易才能夠對你的帳戶資產進行更改，但是只有擁有私鑰的人才能夠簽署這筆交易，因此私鑰是非常重要且敏感的一組數據。
+在其他區塊鏈上，你的公開身份即為私鑰對應的公鑰，地址可以從公鑰被推算出來，公鑰也被用來驗證簽章。然而，Aptos 支援密鑰輪換，導致公鑰可能會發生變化，因此使用地址來代表帳戶。傳統上，每個帳戶都有一個特定的地址作為其識別符號，而且這個地址是不會改變的。在 Aptos 中，即使您更改了身份驗證密鑰（其中包含公鑰），帳戶地址仍然是唯一的，並且不會發生變化。
+身份驗證密鑰（authentication key） Aptos 區塊鏈支援單簽和多簽帳戶。多簽帳戶允許多個用戶共同執行數位簽章來管理帳戶資產。例如，想像一個擁有兩把鎖和兩把鑰匙的保險箱，一把鑰匙由 Alice 持有，另一把則由 Bob 掌管。打開此保險箱的唯一辦法就是兩個人同時提供鑰匙開鎖，只有其中一把鑰匙時則無法打開。多簽帳戶與此類似，它是代表多方的單一帳戶，所有發生的交易都需要所有參與方的簽名，也可以被設定一個閾值，舉個例子，2-of-3 代表三位中只要有兩個簽署即可完成交易。
+多簽帳戶使用多個（私鑰，公鑰）密鑰對，沒有單個公鑰會代表這個帳戶。因此，我們需要一個代表此帳戶的密鑰，以便封裝多簽帳戶中所有用戶的公鑰，這個代表此帳戶的密鑰也就是所謂的身份驗證密鑰。
+身份驗證密鑰是表示多簽帳戶中所有用戶的一種方式。簡而言之，身份驗證密鑰是通過連接所有參與用戶的公鑰的串聯散列創建的。
+1 auth_key = sha3-256(pubkey_1 | . . . | pubkey_n | K | 0x01) 其中K是驗證交易所需的簽名閾值，0x01為 1-byte 多簽方案標識符。
+對於單簽帳戶，也存在身份驗證密鑰，單簽帳戶的身份驗證密鑰只封裝了一個公鑰來代表帳戶，這樣做是為了在所有類型的帳戶上保持一致性。'>
+<meta property='og:url' content='https://ashirleyshe.github.io/p/aptos-key-rotaion/'>
+<meta property='og:site_name' content='A'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Aptos' /><meta property='article:published_time' content='2023-07-08T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2023-07-08T00:00:00&#43;00:00'/>
+<meta name="twitter:title" content="Aptos Key Rotaion">
+<meta name="twitter:description" content="Overview 在本文中，我們將深入探討 Aptos 密鑰輪換的概念及其重要性。在開始之前，讓我們先了解什麼是 Aptos 帳戶、公鑰和私鑰的作用。當私鑰洩漏時，你的帳戶就可能遭到攻擊，但若想保留原有帳戶並確保資產安全，就需要使用密鑰輪換技術。Aptos 帳戶支持密鑰輪換，讓你更改私鑰而不必創建新帳戶，繼而保留原有帳戶的資產和身份。
+接下來，我們將介紹如何使用 Aptos cli 及 Python SDK 完成密鑰輪換，讓你能夠隨時保持帳戶資產及身份的安全。
+什麼是帳戶（account）？ 每個 Aptos 帳戶代表著區塊鏈上一個可以發送交易的實體，並由特定的 32 字節帳戶地址識別。這個帳戶是 Move 模組和 Move 資源的容器，可以包含區塊鏈資產（例如 coin 和 NFT）。這些資產在區塊鏈帳戶中表示為資源，同時帳戶也可以執行各種操作，例如將資源發送給其他人。就像在 Web2 的世界中，你的電子郵件地址代表著你的電子郵件帳戶，而在 Aptos 區塊鏈中，帳戶地址代表著帳戶本身，你可以透過這個地址進行收發資產等操作。
+公鑰（public key）、私鑰（private key） 私鑰在 Aptos 區塊鏈與其他區塊鏈一樣，可以用來簽署交易以使其被認可和驗證，就像在現實生活中需要簽名或輸入密碼才能夠轉帳。簽署過後的交易才能夠對你的帳戶資產進行更改，但是只有擁有私鑰的人才能夠簽署這筆交易，因此私鑰是非常重要且敏感的一組數據。
+在其他區塊鏈上，你的公開身份即為私鑰對應的公鑰，地址可以從公鑰被推算出來，公鑰也被用來驗證簽章。然而，Aptos 支援密鑰輪換，導致公鑰可能會發生變化，因此使用地址來代表帳戶。傳統上，每個帳戶都有一個特定的地址作為其識別符號，而且這個地址是不會改變的。在 Aptos 中，即使您更改了身份驗證密鑰（其中包含公鑰），帳戶地址仍然是唯一的，並且不會發生變化。
+身份驗證密鑰（authentication key） Aptos 區塊鏈支援單簽和多簽帳戶。多簽帳戶允許多個用戶共同執行數位簽章來管理帳戶資產。例如，想像一個擁有兩把鎖和兩把鑰匙的保險箱，一把鑰匙由 Alice 持有，另一把則由 Bob 掌管。打開此保險箱的唯一辦法就是兩個人同時提供鑰匙開鎖，只有其中一把鑰匙時則無法打開。多簽帳戶與此類似，它是代表多方的單一帳戶，所有發生的交易都需要所有參與方的簽名，也可以被設定一個閾值，舉個例子，2-of-3 代表三位中只要有兩個簽署即可完成交易。
+多簽帳戶使用多個（私鑰，公鑰）密鑰對，沒有單個公鑰會代表這個帳戶。因此，我們需要一個代表此帳戶的密鑰，以便封裝多簽帳戶中所有用戶的公鑰，這個代表此帳戶的密鑰也就是所謂的身份驗證密鑰。
+身份驗證密鑰是表示多簽帳戶中所有用戶的一種方式。簡而言之，身份驗證密鑰是通過連接所有參與用戶的公鑰的串聯散列創建的。
+1 auth_key = sha3-256(pubkey_1 | . . . | pubkey_n | K | 0x01) 其中K是驗證交易所需的簽名閾值，0x01為 1-byte 多簽方案標識符。
+對於單簽帳戶，也存在身份驗證密鑰，單簽帳戶的身份驗證密鑰只封裝了一個公鑰來代表帳戶，這樣做是為了在所有類型的帳戶上保持一致性。">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "dark");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/wanhsin_hu366a5cf9d6ed6a7819b52901816f26e5_1994279_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🐱</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">A</a></h1>
+            <h2 class="site-description">Fat Cat</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/about/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+                <li id="i18n-switch">  
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
+                        
+                            <option value="https://ashirleyshe.github.io/" selected>English</option>
+                        
+                            <option value="https://ashirleyshe.github.io/zh-tw/" >繁體中文</option>
+                        
+                    </select>
+                </li>
+            
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>Dark Mode</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+<main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/blockchain/" >
+                Blockchain
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/aptos-key-rotaion/">Aptos Key Rotaion</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Jul 08, 2023</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    5 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="overview">Overview</h1>
+<p>在本文中，我們將深入探討 Aptos 密鑰輪換的概念及其重要性。在開始之前，讓我們先了解什麼是 Aptos 帳戶、公鑰和私鑰的作用。當私鑰洩漏時，你的帳戶就可能遭到攻擊，但若想保留原有帳戶並確保資產安全，就需要使用密鑰輪換技術。Aptos 帳戶支持密鑰輪換，讓你更改私鑰而不必創建新帳戶，繼而保留原有帳戶的資產和身份。</p>
+<p>接下來，我們將介紹如何使用 Aptos cli 及 Python SDK 完成密鑰輪換，讓你能夠隨時保持帳戶資產及身份的安全。</p>
+<h1 id="什麼是帳戶account">什麼是帳戶（account）？</h1>
+<p><img src="https://hackmd.io/_uploads/B1qK7JEt3.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>每個 Aptos 帳戶代表著區塊鏈上一個可以發送交易的實體，並由特定的 32 字節帳戶地址識別。這個帳戶是 Move 模組和 Move 資源的容器，可以包含區塊鏈資產（例如 coin 和 NFT）。這些資產在區塊鏈帳戶中表示為資源，同時帳戶也可以執行各種操作，例如將資源發送給其他人。就像在 Web2 的世界中，你的電子郵件地址代表著你的電子郵件帳戶，而在 Aptos 區塊鏈中，帳戶地址代表著帳戶本身，你可以透過這個地址進行收發資產等操作。</p>
+<h2 id="公鑰public-key私鑰private-key">公鑰（public key）、私鑰（private key）</h2>
+<p>私鑰在 Aptos 區塊鏈與其他區塊鏈一樣，可以用來簽署交易以使其被認可和驗證，就像在現實生活中需要簽名或輸入密碼才能夠轉帳。簽署過後的交易才能夠對你的帳戶資產進行更改，但是只有擁有私鑰的人才能夠簽署這筆交易，因此私鑰是非常重要且敏感的一組數據。</p>
+<p>在其他區塊鏈上，你的公開身份即為私鑰對應的公鑰，地址可以從公鑰被推算出來，公鑰也被用來驗證簽章。然而，Aptos 支援密鑰輪換，導致公鑰可能會發生變化，因此使用地址來代表帳戶。傳統上，每個帳戶都有一個特定的地址作為其識別符號，而且這個地址是不會改變的。在 Aptos 中，即使您更改了身份驗證密鑰（其中包含公鑰），帳戶地址仍然是唯一的，並且不會發生變化。</p>
+<h2 id="身份驗證密鑰authentication-key">身份驗證密鑰（authentication key）</h2>
+<p>Aptos 區塊鏈支援單簽和多簽帳戶。多簽帳戶允許多個用戶共同執行數位簽章來管理帳戶資產。例如，想像一個擁有兩把鎖和兩把鑰匙的保險箱，一把鑰匙由 Alice 持有，另一把則由 Bob 掌管。打開此保險箱的唯一辦法就是兩個人同時提供鑰匙開鎖，只有其中一把鑰匙時則無法打開。多簽帳戶與此類似，它是代表多方的單一帳戶，所有發生的交易都需要所有參與方的簽名，也可以被設定一個閾值，舉個例子，2-of-3 代表三位中只要有兩個簽署即可完成交易。</p>
+<p><img src="https://hackmd.io/_uploads/H11DHlEKh.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>多簽帳戶使用多個（私鑰，公鑰）密鑰對，沒有單個公鑰會代表這個帳戶。因此，我們需要一個代表此帳戶的密鑰，以便封裝多簽帳戶中所有用戶的公鑰，這個代表此帳戶的密鑰也就是所謂的身份驗證密鑰。</p>
+<p>身份驗證密鑰是表示多簽帳戶中所有用戶的一種方式。簡而言之，身份驗證密鑰是通過連接所有參與用戶的公鑰的串聯散列創建的。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">auth_key = sha3-256(pubkey_1 | . . . | pubkey_n | K | 0x01)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>其中<code>K</code>是驗證交易所需的簽名閾值，<code>0x01</code>為 1-byte 多簽方案標識符。</p>
+<p>對於單簽帳戶，也存在身份驗證密鑰，單簽帳戶的身份驗證密鑰只封裝了一個公鑰來代表帳戶，這樣做是為了在所有類型的帳戶上保持一致性。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">auth_key = sha3-256(pubkey_A | 0x00)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>其中 <code>0x00</code> 為 1-byte 單簽方案標識符。</p>
+<p>我們可以說，身份驗證密鑰是私鑰的廣義公共表示。</p>
+<h2 id="帳戶地址">帳戶地址</h2>
+<p>在帳戶創建過程中，產生一組公鑰及私鑰後，會計算出一個 32 字節的身份驗證密鑰，這個身份驗證密鑰將作為帳戶地址。</p>
+<p>單簽帳戶：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">auth_key = sha3-256(pubkey_A | 0x00)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>其中 <code>0x00</code> 為 1-byte 單簽方案標識符。</p>
+<p>多簽帳戶：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">auth_key = sha3-256(pubkey_1 | . . . | pubkey_n | K | 0x01)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>其中<code>K</code>是驗證交易所需的簽名閾值，<code>0x01</code>為 1-byte 多簽方案標識符。</p>
+<p>但是，密鑰輪換後，身份驗證密鑰會發生變化，當生成新的公鑰-私鑰對時，公鑰將輪換密鑰。<strong>但帳戶地址不會改變</strong>。因此，僅在最初，32 字節身份驗證密鑰才會與 32 字節帳戶地址相同。帳戶與金鑰解耦的方法使 Aptos 能夠無縫新增新的數位簽名演算法以支援公鑰和私鑰型別。</p>
+<blockquote>
+<p>帳戶創建後，儘管私鑰、公鑰和認證密鑰可能發生變化，但帳戶地址將<strong>保持不變</strong>。</p>
+</blockquote>
+<h1 id="為什麼我們需要密鑰輪換">為什麼我們需要密鑰輪換？</h1>
+<p>當私鑰洩漏時，你的帳戶就可能遭到攻擊。在 web2 中，多數人會定期修改密碼，減少被盜的風險，還有在 Instagram 或 Facebook 帳戶被盜後，你可以透過其他方式驗證身份，修改密碼並拿回自己的帳號。但是，在大多數區塊鏈中，情況並不那麼簡單。私鑰與公鑰成對出現，而鏈上身份與私鑰綁定，唯一的解決方法是創建一個新帳戶，使用新的公鑰和私鑰對並將所有資產轉移到該帳戶中。</p>
+<p>然而，這種方法會造成很多問題，例如失去原有的帳戶資產、OG 身份的象徵、以及參與過的活動的紀念等。因此，密鑰輪換技術應運而生。Aptos 帳戶支援密鑰輪換，讓你更改私鑰而不必創建新帳戶，從而保留原有帳戶的資產和身份。這意味著你可以保持原有地址，其他人仍然可以使用你原本的地址向你發送資產。唯一會改變的是身份驗證密鑰，因為它是由公鑰計算出來的。</p>
+<p>密鑰輪換技術實現了<strong>鏈上身份</strong>與<strong>安全性</strong>分離，當私鑰洩漏時，你可以替換掉私鑰，從而保護資產免於受到損失或竊取。此外，密鑰輪換也使得我們可以定期更改密鑰，減少私鑰被盜取的風險，同時也為使用多簽帳戶提供了更多彈性。</p>
+<h1 id="authentication-key-rotation">Authentication key rotation</h1>
+<p>密鑰輪換，在 Aptos 中準確來說稱為身份驗證密鑰輪換（Authentication key rotation）。</p>
+<p><a class="link" href="https://github.com/aptos-labs/aptos-core/blob/main/aptos-move/framework/aptos-framework/sources/account.move"  target="_blank" rel="noopener"
+    >account.move</a> 模塊包含了 Aptos 帳戶相關的所有函數。
+用戶可以透過 <code>account::rotate_authentication_key</code> 函數來達成密鑰輪換。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">public entry fun rotate_authentication_key(
+</span></span><span class="line"><span class="cl">    account: &amp;signer,
+</span></span><span class="line"><span class="cl">    from_scheme: u8,
+</span></span><span class="line"><span class="cl">    from_public_key_bytes: vector&lt;u8&gt;,
+</span></span><span class="line"><span class="cl">    to_scheme: u8,
+</span></span><span class="line"><span class="cl">    to_public_key_bytes: vector&lt;u8&gt;,
+</span></span><span class="line"><span class="cl">    cap_rotate_key: vector&lt;u8&gt;,
+</span></span><span class="line"><span class="cl">    cap_update_table: vector&lt;u8&gt;,
+</span></span><span class="line"><span class="cl">) acquires Account, OriginatingAddress {
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    ...
+</span></span><span class="line"><span class="cl">}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>為了授權輪換，我們需要兩個簽名：</p>
+<ol>
+<li><code>cap_rotate_key</code> 是指帳戶目前擁有者對 <code>RotationProofChallenge</code> 的簽名，證明用戶打算並具有能力輪換此帳戶的身份驗證金鑰</li>
+<li><code>cap_update_table</code> 是指所需輪換至的新金鑰（帳戶擁有者想要輪換的金鑰）對<code>RotationProofChallenge</code> 的簽名，證明用戶擁有新的私鑰，並有權更新 <code>OriginatingAddress</code> 映射與新地址映射 <code>&lt;new_address, originating_address&gt;</code>。</li>
+</ol>
+<p>為了驗證這兩個簽名，我們需要它們對應的公鑰和公鑰方案：我們使用 <code>from_scheme</code> 和<code>from_public_key_bytes</code>驗證<code>cap_rotate_key</code>，使用<code>to_scheme</code>和<code>to_public_key_bytes</code>驗證<code>cap_update_table</code>。</p>
+<p>單簽為<code>ED25519_SCHEME</code>，多簽則為<code>MULTI_ED25519_SCHEME</code>。</p>
+<h2 id="使用-aptos-cli-達成單簽帳戶密鑰輪換">使用 Aptos cli 達成單簽帳戶密鑰輪換</h2>
+<p>初始狀態，可以看到 account address 與 authentication key 相同。
+<img src="https://hackmd.io/_uploads/Bywsu-NY2.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<ol>
+<li>產生密鑰：</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">aptos key generate --key-type ed25519 --output-file output.key
+</span></span><span class="line"><span class="cl"><span class="o">{</span>
+</span></span><span class="line"><span class="cl">  <span class="s2">&#34;Result&#34;</span>: <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;PrivateKey Path&#34;</span>: <span class="s2">&#34;output.key&#34;</span>,
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;PublicKey Path&#34;</span>: <span class="s2">&#34;output.key.pub&#34;</span>
+</span></span><span class="line"><span class="cl">  <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ol start="2">
+<li>利用 aptos cli 做 key rotation，參數可以選擇直接填入私鑰或 key file:</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">aptos account rotate-key --new-private-key-file output.key
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">aptos account rotate-key --new-private-key 0xae249782eedbfafcc7da157542d1f97d97385cbda36338c806475a3ce127fd90
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Do you want to submit a transaction <span class="k">for</span> a range of <span class="o">[</span><span class="m">52100</span> - 78100<span class="o">]</span> Octas at a gas unit price of <span class="m">100</span> Octas? <span class="o">[</span>yes/no<span class="o">]</span> &gt;
+</span></span><span class="line"><span class="cl">yes
+</span></span><span class="line"><span class="cl"><span class="o">{</span>
+</span></span><span class="line"><span class="cl">  <span class="s2">&#34;transaction_hash&#34;</span>: <span class="s2">&#34;0x75c412d82e038f87cec14c6c8b08c7fb08290118437e18433700c0e5d0262854&#34;</span>,
+</span></span><span class="line"><span class="cl">  <span class="s2">&#34;gas_used&#34;</span>: 521,
+</span></span><span class="line"><span class="cl">  <span class="s2">&#34;gas_unit_price&#34;</span>: 100,
+</span></span><span class="line"><span class="cl">  <span class="s2">&#34;sender&#34;</span>: <span class="s2">&#34;148f1f6f88d690a04451fa8a548f21129b537cf511cedaa66a6ad93abc83a607&#34;</span>,
+</span></span><span class="line"><span class="cl">  <span class="s2">&#34;sequence_number&#34;</span>: 0,
+</span></span><span class="line"><span class="cl">  <span class="s2">&#34;success&#34;</span>: true,
+</span></span><span class="line"><span class="cl">  <span class="s2">&#34;timestamp_us&#34;</span>: 1688636116823320,
+</span></span><span class="line"><span class="cl">  <span class="s2">&#34;version&#34;</span>: 571106848,
+</span></span><span class="line"><span class="cl">  <span class="s2">&#34;vm_status&#34;</span>: <span class="s2">&#34;Executed successfully&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span><span class="line"><span class="cl">Do you want to create a profile <span class="k">for</span> the new key? <span class="o">[</span>yes/no<span class="o">]</span> &gt;
+</span></span><span class="line"><span class="cl">yes
+</span></span><span class="line"><span class="cl">Enter the name <span class="k">for</span> the profile
+</span></span><span class="line"><span class="cl">Update
+</span></span><span class="line"><span class="cl">Profile Update is saved.
+</span></span><span class="line"><span class="cl"><span class="o">{</span>
+</span></span><span class="line"><span class="cl">  <span class="s2">&#34;Result&#34;</span>: <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;message&#34;</span>: <span class="s2">&#34;Profile Update is saved.&#34;</span>,
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;transaction&#34;</span>: <span class="o">{</span>
+</span></span><span class="line"><span class="cl">      <span class="s2">&#34;transaction_hash&#34;</span>: <span class="s2">&#34;0x75c412d82e038f87cec14c6c8b08c7fb08290118437e18433700c0e5d0262854&#34;</span>,
+</span></span><span class="line"><span class="cl">      <span class="s2">&#34;gas_used&#34;</span>: 521,
+</span></span><span class="line"><span class="cl">      <span class="s2">&#34;gas_unit_price&#34;</span>: 100,
+</span></span><span class="line"><span class="cl">      <span class="s2">&#34;sender&#34;</span>: <span class="s2">&#34;148f1f6f88d690a04451fa8a548f21129b537cf511cedaa66a6ad93abc83a607&#34;</span>,
+</span></span><span class="line"><span class="cl">      <span class="s2">&#34;sequence_number&#34;</span>: 0,
+</span></span><span class="line"><span class="cl">      <span class="s2">&#34;success&#34;</span>: true,
+</span></span><span class="line"><span class="cl">      <span class="s2">&#34;timestamp_us&#34;</span>: 1688636116823320,
+</span></span><span class="line"><span class="cl">      <span class="s2">&#34;version&#34;</span>: 571106848,
+</span></span><span class="line"><span class="cl">      <span class="s2">&#34;vm_status&#34;</span>: <span class="s2">&#34;Executed successfully&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">  <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ol start="3">
+<li>回到 Aptos explorer 查看，authentication key 已改變，account address 維持相同。
+<img src="https://hackmd.io/_uploads/H1CMsWNY3.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></li>
+</ol>
+<p>aptos cli 也可以透過 public key 來反查出帳戶地址：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">aptos account lookup-address --public-key-file output.key.pub
+</span></span><span class="line"><span class="cl">{
+</span></span><span class="line"><span class="cl">  &#34;Result&#34;: &#34;148f1f6f88d690a04451fa8a548f21129b537cf511cedaa66a6ad93abc83a607&#34;
+</span></span><span class="line"><span class="cl">}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="使用-python-sdk-將單簽帳戶輪換為多簽帳戶">使用 Python SDK 將單簽帳戶輪換為多簽帳戶</h2>
+<p>以 aptos-core 中 python sdk 的 <a class="link" href="https://github.com/aptos-labs/aptos-core/blob/main/ecosystem/python/sdk/examples/multisig.py"  target="_blank" rel="noopener"
+    >multisig 範例</a>作為參考，可以根據自己的使用情境進行修改。</p>
+<p>總結一下流程：</p>
+<ol>
+<li>建立一個單簽帳戶</li>
+<li>建立一個多簽帳戶，這邊是建立一個 2-of-3 多簽帳戶</li>
+<li>簽署 rotation proof challenge</li>
+<li>執行輪換 authentication key</li>
+</ol>
+<h3 id="環境安裝">環境安裝</h3>
+<h4 id="安裝-poetry">安裝 Poetry</h4>
+<p>推薦使用 <a class="link" href="https://python-poetry.org/"  target="_blank" rel="noopener"
+    >Poetry</a> 進行 Python 套件管理。</p>
+<ol>
+<li>安裝 Poetry</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">curl -sSL https://install.python-poetry.org <span class="p">|</span> python3 -
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ol start="2">
+<li>將 Poetry 加入 PATH
+依照自己的系統環境，加到 <code>.zshrc</code> 或 <code>.bashrc</code></li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">PATH</span><span class="o">=</span><span class="s2">&#34;</span><span class="nv">$HOME</span><span class="s2">/.local/bin:</span><span class="nv">$PATH</span><span class="s2">&#34;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ol start="3">
+<li>確認 Poetry 安裝完成</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">poetry --version
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="安裝-aptos-python-sdk">安裝 Aptos Python SDK</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">pip3 install aptos-sdk
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>更多詳細資訊，可參考<a class="link" href="https://aptos.dev/sdks/python-sdk"  target="_blank" rel="noopener"
+    >官網文檔</a>。</p>
+<h3 id="執行-aptos-sdk-example">執行 Aptos SDK Example</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">git clone https://github.com/aptos-labs/aptos-core.git
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">cd aptos-core/ecosystem/python/sdk
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>重現專案的 Poetry 虛擬環境</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">poetry env use python3
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>安裝套件</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">poetry install
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>執行</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">poetry run python -m examples.multisig
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="設定">設定</h3>
+<p>引入要用到的庫</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">from aptos_sdk.account import Account, RotationProofChallenge
+</span></span><span class="line"><span class="cl">from aptos_sdk.account_address import AccountAddress
+</span></span><span class="line"><span class="cl">from aptos_sdk.authenticator import Authenticator, MultiEd25519Authenticator
+</span></span><span class="line"><span class="cl">from aptos_sdk.bcs import Serializer
+</span></span><span class="line"><span class="cl">from aptos_sdk.client import FaucetClient, RestClient
+</span></span><span class="line"><span class="cl">from aptos_sdk.ed25519 import MultiPublicKey, MultiSignature
+</span></span><span class="line"><span class="cl">from aptos_sdk.transactions import (
+</span></span><span class="line"><span class="cl">    EntryFunction,
+</span></span><span class="line"><span class="cl">    RawTransaction,
+</span></span><span class="line"><span class="cl">    Script,
+</span></span><span class="line"><span class="cl">    ScriptArgument,
+</span></span><span class="line"><span class="cl">    SignedTransaction,
+</span></span><span class="line"><span class="cl">    TransactionArgument,
+</span></span><span class="line"><span class="cl">    TransactionPayload,
+</span></span><span class="line"><span class="cl">)
+</span></span><span class="line"><span class="cl">from aptos_sdk.type_tag import StructTag, TypeTag
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>設定連接節點、水龍頭資訊，這邊使用 devnet 環境：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">NODE_URL = os.getenv(&#34;APTOS_NODE_URL&#34;, &#34;https://fullnode.devnet.aptoslabs.com/v1&#34;)
+</span></span><span class="line"><span class="cl">FAUCET_URL = os.getenv(
+</span></span><span class="line"><span class="cl">    &#34;APTOS_FAUCET_URL&#34;,
+</span></span><span class="line"><span class="cl">    &#34;https://faucet.devnet.aptoslabs.com&#34;,
+</span></span><span class="line"><span class="cl">)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>初始化客戶端</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">rest_client = RestClient(NODE_URL)
+</span></span><span class="line"><span class="cl">faucet_client = FaucetClient(FAUCET_URL, rest_client)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="建立單簽帳戶">建立單簽帳戶</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">deedee = Account.generate()
+</span></span><span class="line"><span class="cl">faucet_client.fund_account(deedee.address(), 50_000_000)
+</span></span><span class="line"><span class="cl">deedee_balance = rest_client.account_balance(deedee.address())
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Deedee&#39;s address:    0x7ee730f9bb87e78b0f51b4399113af2ed6bc50d0a8e0bc27f914c287af6a9d49
+</span></span><span class="line"><span class="cl">Deedee&#39;s auth key:   0x7ee730f9bb87e78b0f51b4399113af2ed6bc50d0a8e0bc27f914c287af6a9d49
+</span></span><span class="line"><span class="cl">Deedee&#39;s public key: 0x641cb41098c6cea2c2643508ee28e116459c666e353d6dc708290c5dd8f27169
+</span></span><span class="line"><span class="cl">Deedee&#39;s balance:    50000000
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="建立多簽帳戶">建立多簽帳戶</h3>
+<p>這邊我們選擇建立 2-of-3 多簽帳戶，所以先建立三個單簽帳戶，這樣會有三對公鑰私鑰對。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># generate account
+</span></span><span class="line"><span class="cl">alice = Account.generate()
+</span></span><span class="line"><span class="cl">bob = Account.generate()
+</span></span><span class="line"><span class="cl">chad = Account.generate()
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># fund account
+</span></span><span class="line"><span class="cl">faucet_client.fund_account(alice.address(), 10_000_000)
+</span></span><span class="line"><span class="cl">faucet_client.fund_account(bob.address(), 20_000_000)
+</span></span><span class="line"><span class="cl">faucet_client.fund_account(chad.address(), 30_000_000)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">=== Account addresses ===
+</span></span><span class="line"><span class="cl">Alice: 0xe2f0ac3bf3066f83c3f13df40eb1f1e980b15bbf6198dfee0d4bfd741baf92a8
+</span></span><span class="line"><span class="cl">Bob:   0x55234e90dec96a74938a4da2f7815b97494fc3c4b4d8782fa9c0e83399613310
+</span></span><span class="line"><span class="cl">Chad:  0x9b2ff4d016b1dead4c79487275bcb332ce56d0c707bc07cf0f15e223e64122a0
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">=== Authentication keys ===
+</span></span><span class="line"><span class="cl">Alice: 0xe2f0ac3bf3066f83c3f13df40eb1f1e980b15bbf6198dfee0d4bfd741baf92a8
+</span></span><span class="line"><span class="cl">Bob:   0x55234e90dec96a74938a4da2f7815b97494fc3c4b4d8782fa9c0e83399613310
+</span></span><span class="line"><span class="cl">Chad:  0x9b2ff4d016b1dead4c79487275bcb332ce56d0c707bc07cf0f15e223e64122a0
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">=== Public keys ===
+</span></span><span class="line"><span class="cl">Alice: 0x53a03cc129319935ddabc8ac2afb0c5e320cd5bda347413fb6fe33bcdd0b7fb3
+</span></span><span class="line"><span class="cl">Bob:   0x51a95405c021b0449d11d71797ecb72e931c045a55f69ae96aa6c87d55ba8098
+</span></span><span class="line"><span class="cl">Chad:  0x74ac180a4c5b4f6e14f13b8a5e6dd19d102c0e3543268816dcb6484f0da5444d
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>接下來使用上一步產生的公鑰去生成 2-of-3 多簽帳戶公鑰和地址。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># generate public key from Alice, Bob and Chad&#39;s public key
+</span></span><span class="line"><span class="cl">threshold = 2
+</span></span><span class="line"><span class="cl">multisig_public_key = MultiPublicKey(
+</span></span><span class="line"><span class="cl">    [alice.public_key(), bob.public_key(), chad.public_key()], threshold
+</span></span><span class="line"><span class="cl">)
+</span></span><span class="line"><span class="cl"># get address
+</span></span><span class="line"><span class="cl">multisig_address = AccountAddress.from_multi_ed25519(multisig_public_key)
+</span></span><span class="line"><span class="cl"># fund account
+</span></span><span class="line"><span class="cl">faucet_client.fund_account(multisig_address, 40_000_000)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">=== 2-of-3 Multisig account ===
+</span></span><span class="line"><span class="cl">Account public key: 2-of-3 Multi-Ed25519 public key
+</span></span><span class="line"><span class="cl">Account address:    0x77e7728ef2189e48b3b898087c460a63f14955bcc6e4915b95aab8f864be8d05
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="簽署-rotation-proof-challenge">簽署 rotation proof challenge</h3>
+<p>在調用 <code>rotate_authentication_key</code> 之前，需要準備傳入的參數，分別是 <code>cap_rotate_key</code> 及 <code>cap_update_table</code>。
+<code>cap_rotate_key</code> 表 Deedee 批准此身份驗證密鑰輪換。
+<code>cap_update_table</code> 驗證多簽帳戶是否批准身份驗證密鑰輪換。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">rotation_proof_challenge = RotationProofChallenge(
+</span></span><span class="line"><span class="cl">    sequence_number=0,
+</span></span><span class="line"><span class="cl">    originator=deedee.address(),
+</span></span><span class="line"><span class="cl">    current_auth_key=deedee.address(),
+</span></span><span class="line"><span class="cl">    new_public_key=multisig_public_key.to_bytes(),
+</span></span><span class="line"><span class="cl">)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">serializer = Serializer()
+</span></span><span class="line"><span class="cl">rotation_proof_challenge.serialize(serializer)
+</span></span><span class="line"><span class="cl">rotation_proof_challenge_bcs = serializer.output()
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">cap_rotate_key = deedee.sign(rotation_proof_challenge_bcs).data()
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">cap_update_table = MultiSignature(
+</span></span><span class="line"><span class="cl">    multisig_public_key,
+</span></span><span class="line"><span class="cl">    [
+</span></span><span class="line"><span class="cl">        (bob.public_key(), bob.sign(rotation_proof_challenge_bcs)),
+</span></span><span class="line"><span class="cl">        (chad.public_key(), chad.sign(rotation_proof_challenge_bcs)),
+</span></span><span class="line"><span class="cl">    ],
+</span></span><span class="line"><span class="cl">).to_bytes()
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">=== Signing rotation proof challenge ===
+</span></span><span class="line"><span class="cl">cap_rotate_key:   0x497d25f09c29df422e620dd8eaf44ee9b7bbc2844b5143ade652d9a0d084cd1b59e66e6d0c8ebd3a4e6d5b70ddc0f635bbe321ea6ac2902d2ab07e3248e5ac08
+</span></span><span class="line"><span class="cl">cap_update_table: 0xe40f69589e89beca67362c2cadb145df92d77351bfe77aa9318af88f1453576b2fc8e8723fca961e696014a0077946a762c18d7a64547b3ec1f0539f88889303d89de34be00ada58151a124cc3610226ca1c0ca9814be9040bba3c6d02f169a53b922ce6cb026165746c8e90837affac8692206dc9eb0f82f0117742d331670a60000000
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="執行輪換-authentication-key">執行輪換 authentication key</h3>
+<p>現在可以提交身份驗證密鑰輪換的交易。執行後，輪換後的身份驗證密鑰與多簽帳戶的地址相匹配。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">from_scheme = Authenticator.ED25519
+</span></span><span class="line"><span class="cl">from_public_key_bytes = deedee.public_key().key.encode()
+</span></span><span class="line"><span class="cl">to_scheme = Authenticator.MULTI_ED25519
+</span></span><span class="line"><span class="cl">to_public_key_bytes = multisig_public_key.to_bytes()
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">entry_function = EntryFunction.natural(
+</span></span><span class="line"><span class="cl">    module=&#34;0x1::account&#34;,
+</span></span><span class="line"><span class="cl">    function=&#34;rotate_authentication_key&#34;,
+</span></span><span class="line"><span class="cl">    ty_args=[],
+</span></span><span class="line"><span class="cl">    args=[
+</span></span><span class="line"><span class="cl">        TransactionArgument(from_scheme, Serializer.u8),
+</span></span><span class="line"><span class="cl">        TransactionArgument(from_public_key_bytes, Serializer.to_bytes),
+</span></span><span class="line"><span class="cl">        TransactionArgument(to_scheme, Serializer.u8),
+</span></span><span class="line"><span class="cl">        TransactionArgument(to_public_key_bytes, Serializer.to_bytes),
+</span></span><span class="line"><span class="cl">        TransactionArgument(cap_rotate_key, Serializer.to_bytes),
+</span></span><span class="line"><span class="cl">        TransactionArgument(cap_update_table, Serializer.to_bytes),
+</span></span><span class="line"><span class="cl">    ],
+</span></span><span class="line"><span class="cl">)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">signed_transaction = rest_client.create_bcs_signed_transaction(
+</span></span><span class="line"><span class="cl">    deedee, TransactionPayload(entry_function)
+</span></span><span class="line"><span class="cl">)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># auth key before key rotation
+</span></span><span class="line"><span class="cl">auth_key = rest_client.account(deedee.address())[&#34;authentication_key&#34;]
+</span></span><span class="line"><span class="cl">print(f&#34;Auth key pre-rotation: {auth_key}&#34;)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># send key rotation tx
+</span></span><span class="line"><span class="cl">tx_hash = rest_client.submit_bcs_transaction(signed_transaction)
+</span></span><span class="line"><span class="cl">rest_client.wait_for_transaction(tx_hash)
+</span></span><span class="line"><span class="cl">print(f&#34;Transaction hash:      {tx_hash}&#34;)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># auth key after key rotation
+</span></span><span class="line"><span class="cl">auth_key = rest_client.account(deedee.address())[&#34;authentication_key&#34;]
+</span></span><span class="line"><span class="cl">print(f&#34;New auth key:          {auth_key}&#34;)
+</span></span><span class="line"><span class="cl">print(f&#34;1st multisig address:  {multisig_address}&#34;)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">=== Submitting authentication key rotation transaction ===
+</span></span><span class="line"><span class="cl">Auth key pre-rotation: 0x7ee730f9bb87e78b0f51b4399113af2ed6bc50d0a8e0bc27f914c287af6a9d49
+</span></span><span class="line"><span class="cl">Transaction hash:      0x16046f72559268dc4025d28bbc2d8c91ab7a780e237cbf430965477910014df0
+</span></span><span class="line"><span class="cl">New auth key:          0x77e7728ef2189e48b3b898087c460a63f14955bcc6e4915b95aab8f864be8d05
+</span></span><span class="line"><span class="cl">1st multisig address:  0x77e7728ef2189e48b3b898087c460a63f14955bcc6e4915b95aab8f864be8d05
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h1 id="總結">總結</h1>
+<p>Aptos 帳戶讓鏈上地址身份與私鑰解耦，提供了單簽及多簽帳戶，最重要的是具有密鑰輪換的功能。
+地址在創建帳號後維持不變，即使在密鑰輪換後仍然維持相同。
+密鑰輪換改變的是公鑰私鑰對以及身份驗證密鑰。</p>
+<h1 id="reference">Reference</h1>
+<ul>
+<li><a class="link" href="https://aptos.dev/concepts/accounts/"  target="_blank" rel="noopener"
+    >https://aptos.dev/concepts/accounts/</a></li>
+<li><a class="link" href="https://medium.com/@martian-wallet/accounts-in-aptos-1ecc3f0b1213"  target="_blank" rel="noopener"
+    >https://medium.com/@martian-wallet/accounts-in-aptos-1ecc3f0b1213</a></li>
+<li><a class="link" href="https://forum.aptoslabs.com/t/aptos-review-account-system/150437"  target="_blank" rel="noopener"
+    >https://forum.aptoslabs.com/t/aptos-review-account-system/150437</a></li>
+<li><a class="link" href="https://aptos.dev/tutorials/your-first-multisig/"  target="_blank" rel="noopener"
+    >https://aptos.dev/tutorials/your-first-multisig/</a></li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/aptos/">Aptos</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/p/2023-feb-defi-hack-recap-analysis/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="https://i.imgur.com/JbOqEij.jpg" loading="lazy" data-key="" data-hash="https://i.imgur.com/JbOqEij.jpg"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">2023 Feb Defi Hack Recap &amp; Analysis</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/blockchain-tools/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Blockchain Tools</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "ashley-10" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2023 A
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.13.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#公鑰public-key私鑰private-key">公鑰（public key）、私鑰（private key）</a></li>
+    <li><a href="#身份驗證密鑰authentication-key">身份驗證密鑰（authentication key）</a></li>
+    <li><a href="#帳戶地址">帳戶地址</a></li>
+  </ol>
+
+  <ol>
+    <li><a href="#使用-aptos-cli-達成單簽帳戶密鑰輪換">使用 Aptos cli 達成單簽帳戶密鑰輪換</a></li>
+    <li><a href="#使用-python-sdk-將單簽帳戶輪換為多簽帳戶">使用 Python SDK 將單簽帳戶輪換為多簽帳戶</a>
+      <ol>
+        <li><a href="#環境安裝">環境安裝</a>
+          <ol>
+            <li><a href="#安裝-poetry">安裝 Poetry</a></li>
+            <li><a href="#安裝-aptos-python-sdk">安裝 Aptos Python SDK</a></li>
+          </ol>
+        </li>
+        <li><a href="#執行-aptos-sdk-example">執行 Aptos SDK Example</a></li>
+        <li><a href="#設定">設定</a></li>
+        <li><a href="#建立單簽帳戶">建立單簽帳戶</a></li>
+        <li><a href="#建立多簽帳戶">建立多簽帳戶</a></li>
+        <li><a href="#簽署-rotation-proof-challenge">簽署 rotation proof challenge</a></li>
+        <li><a href="#執行輪換-authentication-key">執行輪換 authentication key</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

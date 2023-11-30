@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Graph node 搭建、subgraph 撰寫及部署'><title>The graph - 區塊鏈數據索引協議</title>
+
+<link rel='canonical' href='https://ashirleyshe.github.io/p/the-graph-%E5%8D%80%E5%A1%8A%E9%8F%88%E6%95%B8%E6%93%9A%E7%B4%A2%E5%BC%95%E5%8D%94%E8%AD%B0/'>
+
+<link rel="stylesheet" href="/scss/style.min.ac77dcf8b111b51da39a92990f431923f210f3876d85798a2125667f96dc33a4.css"><meta property='og:title' content='The graph - 區塊鏈數據索引協議'>
+<meta property='og:description' content='Graph node 搭建、subgraph 撰寫及部署'>
+<meta property='og:url' content='https://ashirleyshe.github.io/p/the-graph-%E5%8D%80%E5%A1%8A%E9%8F%88%E6%95%B8%E6%93%9A%E7%B4%A2%E5%BC%95%E5%8D%94%E8%AD%B0/'>
+<meta property='og:site_name' content='A'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='the graph' /><meta property='article:tag' content='graph node' /><meta property='article:tag' content='subgraph' /><meta property='article:published_time' content='2022-06-20T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2022-06-20T00:00:00&#43;00:00'/>
+<meta name="twitter:title" content="The graph - 區塊鏈數據索引協議">
+<meta name="twitter:description" content="Graph node 搭建、subgraph 撰寫及部署">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "dark");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/wanhsin_hu366a5cf9d6ed6a7819b52901816f26e5_1994279_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🐱</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">A</a></h1>
+            <h2 class="site-description">Fat Cat</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/about/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+                <li id="i18n-switch">  
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
+                        
+                            <option value="https://ashirleyshe.github.io/" selected>English</option>
+                        
+                            <option value="https://ashirleyshe.github.io/zh-tw/" >繁體中文</option>
+                        
+                    </select>
+                </li>
+            
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>Dark Mode</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+<main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/tech/" >
+                Tech
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/the-graph-%E5%8D%80%E5%A1%8A%E9%8F%88%E6%95%B8%E6%93%9A%E7%B4%A2%E5%BC%95%E5%8D%94%E8%AD%B0/">The graph - 區塊鏈數據索引協議</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            Graph node 搭建、subgraph 撰寫及部署
+        </h3>
+        
+    </div>
+
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Jun 20, 2022</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    4 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="前言">前言</h2>
+<p>開開心心學 the graph</p>
+<p>從 subgraph 撰寫、搭建本地 graph node 到部署 subgraph</p>
+<h2 id="introduction">Introduction</h2>
+<blockquote>
+<p>The Graph is a decentralized protocol for indexing and querying data from blockchains, starting with Ethereum.</p>
+</blockquote>
+<p>The graph 為一個去中心化索引協議，用於索引和查詢區塊鏈的數據。</p>
+<blockquote>
+<p>It makes it possible to query data that is difficult to query directly.</p>
+</blockquote>
+<p>The graph 使那些難以直接查詢的數據變成可能。</p>
+<p>舉例來說，我們想要取得某個用戶在 Uniswap 在各個 pool 有多少資產，過去可以透過連接鏈上 endpoint、發起 RPC call、調用合約接口達成。具體來說：</p>
+<ol>
+<li>取得總共有幾個 pool</li>
+<li>取得所有 pool 的合約地址</li>
+<li>遍歷所有 pool 合約取得該用戶的 balance</li>
+</ol>
+<p>但是這麼做有幾個缺點：</p>
+<ul>
+<li>endpoint 的 request 時間可能較長</li>
+<li>需發出多個 RPC call，畢竟可是有好幾百個 pool&hellip;</li>
+</ul>
+<p>以上例子利用 <a class="link" href="https://thegraph.com/hosted-service/subgraph/uniswap/uniswap-v2"  target="_blank" rel="noopener"
+    >the graph</a> 的話只需要一個 query 就能達成:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-graphql" data-lang="graphql"><span class="line"><span class="cl"><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="py">users</span><span class="p">(</span><span class="py">where</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nc">id</span><span class="p">:</span><span class="s">&#34;0x4de7009354f32b950052d4556695c04449820849&#34;</span><span class="p">})</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nc">id</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="py">liquidityPositions</span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="py">liquidityTokenBalance</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="py">pair</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="py">token0</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="py">symbol</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="py">totalSupply</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="py">token1</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="py">symbol</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="py">totalSupply</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>可以搭配 <a class="link" href="https://debank.com/profile/0x4de7009354f32b950052d4556695c04449820849"  target="_blank" rel="noopener"
+    >Debank</a> 看看結果</p>
+<p>The graph 除了可以解決某些情境的效能瓶頸，有時候根據合約接口甚至沒辦法取得我們需要的數據，所以需要根據需求提前構建索引，the graph 則會根據規則索引鏈上數據，使用者可以透過 GraphQL API 查詢數據。</p>
+<p>題外話， multicall 可以參考兔子哥：<a class="link" href="https://github.com/banteg/multicall.py"  target="_blank" rel="noopener"
+    >https://github.com/banteg/multicall.py</a></p>
+<h2 id="the-graph-protocol">The graph protocol</h2>
+<p>The Graph 根據子圖描述（subgraph manifest）來學習什麼以及如何索引鏈上數據。Subgraph manifest 定義了子圖的 data source (智能合約)，以及此合約要處理的 event，還有如何將 event 數據 mapping 到資料庫。</p>
+<p>查詢及索引都是透過 graph node 完成，啟動後會連接區塊鏈節點及 IPFS。</p>
+<!-- raw HTML omitted -->
+<p><img src="https://thegraph.com/docs/img/graph-dataflow.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<!-- raw HTML omitted -->
+<p>以下舉個例子：</p>
+<ol>
+<li>定義了一個會記錄某 token 所有 transfer event 的子圖。</li>
+<li>用戶透過一筆 transaction 轉了 token 給另一個人（transfer)。</li>
+<li>當合約處理此交易的時候觸發了 transfer event。</li>
+<li>Graph node 持續掃描區塊。</li>
+<li>當某區塊包含 transfer event，graph node 會執行 mapping 處理程序，並將處理好的資料儲存。</li>
+<li>透過 GraphQL API 可以查詢到索引下來的數據。</li>
+</ol>
+<h2 id="graph-node-部署">Graph node 部署</h2>
+<h3 id="running-a-graph-node-using-docker">Running a graph node using Docker</h3>
+<p><a class="link" href="https://github.com/graphprotocol/graph-node/tree/master/docker"  target="_blank" rel="noopener"
+    >https://github.com/graphprotocol/graph-node/tree/master/docker</a></p>
+<p>注意，使用 Macbook M1 請見此連結重新 build image: <a class="link" href="https://github.com/graphprotocol/graph-node/tree/v0.26.0/docker#running-graph-node-on-an-macbook-m1"  target="_blank" rel="noopener"
+    >https://github.com/graphprotocol/graph-node/tree/v0.26.0/docker#running-graph-node-on-an-macbook-m1</a></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">git clone https://github.com/graphprotocol/graph-node.git
+</span></span><span class="line"><span class="cl">cd docker
+</span></span><span class="line"><span class="cl">docker-compose up
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="running-a-local-graph-node">Running a local graph node</h3>
+<p>rust 安装</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">curl --proto <span class="s1">&#39;=https&#39;</span> --tlsv1.2 https://sh.rustup.rs -sSf <span class="p">|</span> sh
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Postgresql 安装</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">brew install postgresql
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>IPFS 安裝</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">brew install ipfs
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Start Up an IPFS Node</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">ipfs init
+</span></span><span class="line"><span class="cl">ipfs daemon
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Create the Postgres databas</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">initdb -D .postgres
+</span></span><span class="line"><span class="cl">pg_ctl -D .postgres -l logfile start
+</span></span><span class="line"><span class="cl">createdb graph-node
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Start the Graph Node</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">git clone https://github.com/graphprotocol/graph-node.git
+</span></span><span class="line"><span class="cl"><span class="nb">cd</span> graph-node
+</span></span><span class="line"><span class="cl">cargo run -p graph-node --release -- <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --postgres-url postgresql://USERNAME:PASSWORD@127.0.0.1:5432/graph-node <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --ethereum-rpc mainnet:&lt;ETHEREUM_RPC&gt; <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --ipfs 127.0.0.1:5001
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Try your OS username as USERNAME and PASSWORD</p>
+<h2 id="subgraph">Subgraph</h2>
+<p>以 WETH token 為例： <a class="link" href="https://github.com/ashirleyshe/subgraph/tree/main/weth-erc20"  target="_blank" rel="noopener"
+    >https://github.com/ashirleyshe/subgraph/tree/main/weth-erc20</a></p>
+<p>於 Subgraph studio 的部署：<a class="link" href="https://api.studio.thegraph.com/query/27930/weth-subgraph/v0.1.1/graphql"  target="_blank" rel="noopener"
+    >https://api.studio.thegraph.com/query/27930/weth-subgraph/v0.1.1/graphql</a></p>
+<p>需要寫的部分：</p>
+<ol>
+<li><code>subgraph.yaml</code>: subgraph manifest</li>
+<li><code>schema.graphql</code>: GraphQL schema 定義子圖資料(entity)如何儲存及如何透過 GraphQL query</li>
+<li><code>AssemblyScript Mappings</code>: <a class="link" href="https://github.com/AssemblyScript/assemblyscript"  target="_blank" rel="noopener"
+    >AssemblyScript</a> code 將 event data 轉成  schema 中的 entity</li>
+</ol>
+<p>Reference: <a class="link" href="https://docs.openzeppelin.com/subgraphs/0.1.x/"  target="_blank" rel="noopener"
+    >https://docs.openzeppelin.com/subgraphs/0.1.x/</a></p>
+<p>使用 Openzeppelin subgraph library</p>
+<p>當要支援多個 erc20 時，編寫 manifest 可以藉由套件完成(@amxx/graphprotocol-utils):</p>
+<ol>
+<li>
+<p>先準備config，裡面填寫 datasource 也就是 token address，範例：https://github.com/OpenZeppelin/openzeppelin-subgraphs/blob/main/configs/top-erc20.json</p>
+</li>
+<li>
+<p>生成 schema 及 manifest</p>
+</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">npx graph-compiler <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --config sample.json <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --include node_modules/@openzeppelin/subgraphs/src/datasources <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --export-schema <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --export-subgraph
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="部署-subgraph">部署 subgraph</h3>
+<h4 id="packagejson">package.json</h4>
+<p>在 script 中增加 &ldquo;create-local&rdquo; &ldquo;remove-local&rdquo; &ldquo;deploy-local&rdquo; 方便後續部署</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;gravity&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;license&#34;</span><span class="p">:</span> <span class="s2">&#34;UNLICENSED&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;scripts&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;codegen&#34;</span><span class="p">:</span> <span class="s2">&#34;graph codegen&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;build&#34;</span><span class="p">:</span> <span class="s2">&#34;graph build&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;deploy&#34;</span><span class="p">:</span> <span class="s2">&#34;graph deploy --node https://api.studio.thegraph.com/deploy/ gravity&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;create-local&#34;</span><span class="p">:</span> <span class="s2">&#34;graph create --node http://127.0.0.1:8020/ gravity&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;remove-local&#34;</span><span class="p">:</span> <span class="s2">&#34;graph remove --node http://127.0.0.1:8020/ gravity&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;deploy-local&#34;</span><span class="p">:</span> <span class="s2">&#34;graph deploy --node http://127.0.0.1:8020/ --ipfs http://127.0.0.1:5001 gravity&#34;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">},</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;dependencies&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;@graphprotocol/graph-cli&#34;</span><span class="p">:</span> <span class="s2">&#34;0.29.2&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;@graphprotocol/graph-ts&#34;</span><span class="p">:</span> <span class="s2">&#34;0.26.0&#34;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">yarn
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># Code Generation
+</span></span><span class="line"><span class="cl">yarn codegen
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># Build
+</span></span><span class="line"><span class="cl">yarn build
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">yarn create-local
+</span></span><span class="line"><span class="cl">yarn deploy-local
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>完成 subgraph 部署后，便會從某個區塊開始構建索引</p>
+<h2 id="checking-subgraph-health">Checking Subgraph health</h2>
+<p><a class="link" href="https://thegraph.com/docs/hostedservice/deploy-subgraph-hosted#checking-subgraph-health"  target="_blank" rel="noopener"
+    >https://thegraph.com/docs/hostedservice/deploy-subgraph-hosted#checking-subgraph-health</a></p>
+<p>subgraph sync status 可以在這邊看到：預設 port <code>8030/subgraph</code></p>
+<p>Example query:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">{
+</span></span><span class="line"><span class="cl">  indexingStatusForCurrentVersion(subgraphName: &#34;org/subgraph&#34;) {
+</span></span><span class="line"><span class="cl">    synced
+</span></span><span class="line"><span class="cl">    health
+</span></span><span class="line"><span class="cl">    fatalError {
+</span></span><span class="line"><span class="cl">      message
+</span></span><span class="line"><span class="cl">      block {
+</span></span><span class="line"><span class="cl">        number
+</span></span><span class="line"><span class="cl">        hash
+</span></span><span class="line"><span class="cl">      }
+</span></span><span class="line"><span class="cl">      handler
+</span></span><span class="line"><span class="cl">    }
+</span></span><span class="line"><span class="cl">    chains {
+</span></span><span class="line"><span class="cl">      chainHeadBlock {
+</span></span><span class="line"><span class="cl">        number
+</span></span><span class="line"><span class="cl">      }
+</span></span><span class="line"><span class="cl">      latestBlock {
+</span></span><span class="line"><span class="cl">        number
+</span></span><span class="line"><span class="cl">      }
+</span></span><span class="line"><span class="cl">    }
+</span></span><span class="line"><span class="cl">  }
+</span></span><span class="line"><span class="cl">}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="performance-improvement">Performance Improvement</h2>
+<ul>
+<li>
+<p>Two Simple Subgraph Performance Improvements</p>
+<ul>
+<li>
+<p><a class="link" href="https://medium.com/edge-node-engineering/two-simple-subgraph-performance-improvements-a76c6b3e7eac"  target="_blank" rel="noopener"
+    >https://medium.com/edge-node-engineering/two-simple-subgraph-performance-improvements-a76c6b3e7eac</a></p>
+</li>
+<li>
+<p>Using immutable entities and <code>Bytes</code> as the id</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Graph Node Environment Variables</p>
+<ul>
+<li><a class="link" href="https://github.com/graphprotocol/graph-node/blob/master/docs/environment-variables.md"  target="_blank" rel="noopener"
+    >https://github.com/graphprotocol/graph-node/blob/master/docs/environment-variables.md</a></li>
+</ul>
+</li>
+<li>
+<p>CallHandler</p>
+<ul>
+<li>The graph 官方推薦使用 EventHandler 就好，使用 CallHandler 可能導致同步效率緩慢。</li>
+</ul>
+</li>
+<li>
+<p>Substreams</p>
+<ul>
+<li><a class="link" href="https://thegraph.com/blog/substreams-parallel-processing"  target="_blank" rel="noopener"
+    >https://thegraph.com/blog/substreams-parallel-processing</a></li>
+<li>原先的 RPC-based Subgraphs 使用 linear indexing model (一個 event 處理完才能處理下一個)</li>
+<li>Substreams take things even further by enabling massively parallelized streaming data.</li>
+</ul>
+</li>
+</ul>
+<h2 id="一些坑">一些坑</h2>
+<h3 id="http-error-creating-the-subgraph-econnrefused">HTTP error creating the subgraph: ECONNREFUSED</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">➜  weth-erc20 yarn create-local
+</span></span><span class="line"><span class="cl">yarn run v1.22.19
+</span></span><span class="line"><span class="cl">warning ../package.json: No license field
+</span></span><span class="line"><span class="cl">$ graph create --node http://localhost:8020/ weth-erc20
+</span></span><span class="line"><span class="cl">✖ HTTP error creating the subgraph: ECONNREFUSED
+</span></span><span class="line"><span class="cl">error Command failed with exit code 1.
+</span></span><span class="line"><span class="cl">info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>→ localhost 改成 127.0.0.1 即可</p>
+<h3 id="failed-to-get-entities-from-store-column-cblock-does-not-exist">Failed to get entities from store: column c.block$ does not exist</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">{
+</span></span><span class="line"><span class="cl">  &#34;errors&#34;: [
+</span></span><span class="line"><span class="cl">    {
+</span></span><span class="line"><span class="cl">      &#34;message&#34;: &#34;Failed to get entities from store: column c.block$ does not exist, query = /* qid: 431b3891025ffb2d-6dc8c4ef99f8cc6a */\nselect &#39;ERC20Deposit&#39; as entity, to_jsonb(c.*) as data from (select  * \n  from \&#34;sgd33\&#34;.\&#34;erc20_deposit\&#34; c\n where c.block$ &lt;= $1\n\n order by \&#34;id\&#34;\n limit 100) c -- binds: [4752680]&#34;
+</span></span><span class="line"><span class="cl">    }
+</span></span><span class="line"><span class="cl">  ]
+</span></span><span class="line"><span class="cl">}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>→ graph node bug 新版本已修復</p>
+<p><a class="link" href="https://github.com/graphprotocol/graph-node/issues/3553"  target="_blank" rel="noopener"
+    >https://github.com/graphprotocol/graph-node/issues/3553</a></p>
+<h3 id="graph-ts-graph-cli-版本">graph-ts graph-cli 版本</h3>
+<p>每個 subgraph 要額外定義，每個版本可能不一樣TT</p>
+<h2 id="reference">Reference</h2>
+<ul>
+<li><a class="link" href="https://thegraph.com/docs/en/about/introduction/"  target="_blank" rel="noopener"
+    >https://thegraph.com/docs/en/about/introduction/</a></li>
+<li><a class="link" href="https://github.com/graphprotocol/graph-node"  target="_blank" rel="noopener"
+    >https://github.com/graphprotocol/graph-node</a></li>
+<li><a class="link" href="https://thegraph.academy/developers/defining-a-subgraph/"  target="_blank" rel="noopener"
+    >https://thegraph.academy/developers/defining-a-subgraph/</a></li>
+</ul>
+<p><img src="https://stickershop.line-scdn.net/stickershop/v1/product/1976/LINEStorePC/main.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/the-graph/">the graph</a>
+        
+            <a href="/tags/graph-node/">graph node</a>
+        
+            <a href="/tags/subgraph/">subgraph</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/github-notes/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Github Notes</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/my-mac-settings/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">My Mac Settings</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/hugo-quick-start/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Hugo Quick Start</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/%E4%BD%BF%E7%94%A8-rust-edp-%E6%92%B0%E5%AF%AB-intel-sgx-%E7%A8%8B%E5%BC%8F/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">使用 Rust EDP 撰寫 Intel SGX 程式</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "ashley-10" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2023 A
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.13.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#前言">前言</a></li>
+    <li><a href="#introduction">Introduction</a></li>
+    <li><a href="#the-graph-protocol">The graph protocol</a></li>
+    <li><a href="#graph-node-部署">Graph node 部署</a>
+      <ol>
+        <li><a href="#running-a-graph-node-using-docker">Running a graph node using Docker</a></li>
+        <li><a href="#running-a-local-graph-node">Running a local graph node</a></li>
+      </ol>
+    </li>
+    <li><a href="#subgraph">Subgraph</a>
+      <ol>
+        <li><a href="#部署-subgraph">部署 subgraph</a>
+          <ol>
+            <li><a href="#packagejson">package.json</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#checking-subgraph-health">Checking Subgraph health</a></li>
+    <li><a href="#performance-improvement">Performance Improvement</a></li>
+    <li><a href="#一些坑">一些坑</a>
+      <ol>
+        <li><a href="#http-error-creating-the-subgraph-econnrefused">HTTP error creating the subgraph: ECONNREFUSED</a></li>
+        <li><a href="#failed-to-get-entities-from-store-column-cblock-does-not-exist">Failed to get entities from store: column c.block$ does not exist</a></li>
+        <li><a href="#graph-ts-graph-cli-版本">graph-ts graph-cli 版本</a></li>
+      </ol>
+    </li>
+    <li><a href="#reference">Reference</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

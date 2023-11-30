@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Defi on Ashley&#39;s Blog</title>
+        <link>https://ashirleyshe.github.io/categories/defi/</link>
+        <description>Recent content in Defi on Ashley&#39;s Blog</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en-us</language>
+        <lastBuildDate>Wed, 08 Mar 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://ashirleyshe.github.io/categories/defi/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>2023 Feb Defi Hack</title>
+        <link>https://ashirleyshe.github.io/p/2023-feb-defi-hack/</link>
+        <pubDate>Wed, 08 Mar 2023 00:00:00 +0000</pubDate>
+        
+        <guid>https://ashirleyshe.github.io/p/2023-feb-defi-hack/</guid>
+        <description>&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
+&lt;h3 id=&#34;defi-安全事件&#34;&gt;Defi 安全事件&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;2 月 10 日，dForce 遭受攻擊，又是 read-only reentrancy，損失約 370 萬美元。&lt;/li&gt;
+&lt;li&gt;2 月 17 日，Avalanche 鏈上的 Platypus 項目遭受閃電貸攻擊，損失約 850 萬美元。&lt;/li&gt;
+&lt;li&gt;2 月 17 日，Dexible 項目因合約中函數邏輯漏洞遭受攻擊，損失約 154 萬美元。&lt;/li&gt;
+&lt;li&gt;2 月 21 日，Cosmos 生態 Layer1 公鏈 Kujira 遭到攻擊，損失約 23 萬美元。&lt;/li&gt;
+&lt;li&gt;2 月 24 日，DeFi 協議 FEG 遭到攻擊，損失約 20 萬美元。該項目 2022 年 5 月也遭受過兩次攻擊，當時損失分別為 130 萬美元和 190 萬美元。&lt;/li&gt;
+&lt;li&gt;2 月 24 日，Shata Capital 合約在升級後遭受攻擊，損失約 510 萬美元。&lt;/li&gt;
+&lt;li&gt;2 月 27 日，SwapX 合約因關鍵函數缺乏訪問控制而遭到攻擊，此合約並未開源，多個授權給該合約的代幣遭受了損失，涉及金額約 90 萬美元。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;其他安全事件&#34;&gt;其他安全事件&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;2 月 21 日，Arbitrum 鏈上 Hope Finance 發生 rug pull，提取了 180 萬美元並轉入 Tornado Cash。&lt;/li&gt;
+&lt;li&gt;2 月 25 日，Wormhole 遭駭的 12 萬顆 eth 被 Jump Crypto 及 Oasis 回收。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;platypus&#34;&gt;Platypus&lt;/h2&gt;
+&lt;h2 id=&#34;heading&#34;&gt;&lt;/h2&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

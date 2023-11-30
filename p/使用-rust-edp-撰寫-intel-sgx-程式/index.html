@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='前言 Intel Software Guard Extensions(Intel SGX) 提供以硬體為基礎的可信執行環境，與 ARM TrustZone 類似，可在記憶體內隔離特定的應用程式碼與資料，保護隱密資料不會被惡意程式攻擊或竊取。 它允許用戶於記憶體中建立私有區域，稱為「指定位址空間」(enclave)，程式碼可於 enclave 中執行， 與其他運行在相同或更高權限級別的程式有效隔離。
+Intel SGX &amp;amp; Enclave Intel SGX 為於 x86 實作 enclave 的 instruction set extension。 Enclave 為程式提供了一個安全的執行環境，不受外界干擾。 該環境建立在三個關鍵點上：
+Fully isolated execution 通常在執行程式時，會有大量程式比你的程式擁有更多的特權：像是作業系統等等。他們可以從記憶體中讀取 secret，在其他機器上創建你的程式的副本，並修改你的程式的工作方式。 而在 enclave 中運行的程式與系統的其餘部分完全隔離。一旦 enclave 被加載，保存在 enclave 中的程式和數據就不會被修改，初始記憶體內容代表 enclave 的身份(identity)，如果更改 enclave 的程式，其身份也會更改。
+使用 Intel SGX 的應用程式會分為兩個部分：
+可信部分（Trusted component）：也就是 enclave。 不受信任部分（Untrusted component）：這是應用程式的其餘部分及其任何模塊。從 enclave 的角度來看，OS 和 VMM 被視為不受信任的部分。 Sealing 資料並不會永久的儲存在 enclave 中。 Sealing 為將數據加密的過程，以便將數據儲存在不受信任的地方。 Enclave 會獲得和自己身份和 CPU 相關的密鑰，此密鑰稱為密封密鑰（sealing key)，它可用於加密數據（sealed blob），以後在完全相同的 CPU 上運行的完全相同的 enclave 程式就能解密數據。'><title>使用 Rust EDP 撰寫 Intel SGX 程式</title>
+
+<link rel='canonical' href='https://ashirleyshe.github.io/p/%E4%BD%BF%E7%94%A8-rust-edp-%E6%92%B0%E5%AF%AB-intel-sgx-%E7%A8%8B%E5%BC%8F/'>
+
+<link rel="stylesheet" href="/scss/style.min.ac77dcf8b111b51da39a92990f431923f210f3876d85798a2125667f96dc33a4.css"><meta property='og:title' content='使用 Rust EDP 撰寫 Intel SGX 程式'>
+<meta property='og:description' content='前言 Intel Software Guard Extensions(Intel SGX) 提供以硬體為基礎的可信執行環境，與 ARM TrustZone 類似，可在記憶體內隔離特定的應用程式碼與資料，保護隱密資料不會被惡意程式攻擊或竊取。 它允許用戶於記憶體中建立私有區域，稱為「指定位址空間」(enclave)，程式碼可於 enclave 中執行， 與其他運行在相同或更高權限級別的程式有效隔離。
+Intel SGX &amp;amp; Enclave Intel SGX 為於 x86 實作 enclave 的 instruction set extension。 Enclave 為程式提供了一個安全的執行環境，不受外界干擾。 該環境建立在三個關鍵點上：
+Fully isolated execution 通常在執行程式時，會有大量程式比你的程式擁有更多的特權：像是作業系統等等。他們可以從記憶體中讀取 secret，在其他機器上創建你的程式的副本，並修改你的程式的工作方式。 而在 enclave 中運行的程式與系統的其餘部分完全隔離。一旦 enclave 被加載，保存在 enclave 中的程式和數據就不會被修改，初始記憶體內容代表 enclave 的身份(identity)，如果更改 enclave 的程式，其身份也會更改。
+使用 Intel SGX 的應用程式會分為兩個部分：
+可信部分（Trusted component）：也就是 enclave。 不受信任部分（Untrusted component）：這是應用程式的其餘部分及其任何模塊。從 enclave 的角度來看，OS 和 VMM 被視為不受信任的部分。 Sealing 資料並不會永久的儲存在 enclave 中。 Sealing 為將數據加密的過程，以便將數據儲存在不受信任的地方。 Enclave 會獲得和自己身份和 CPU 相關的密鑰，此密鑰稱為密封密鑰（sealing key)，它可用於加密數據（sealed blob），以後在完全相同的 CPU 上運行的完全相同的 enclave 程式就能解密數據。'>
+<meta property='og:url' content='https://ashirleyshe.github.io/p/%E4%BD%BF%E7%94%A8-rust-edp-%E6%92%B0%E5%AF%AB-intel-sgx-%E7%A8%8B%E5%BC%8F/'>
+<meta property='og:site_name' content='A'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='sgx' /><meta property='article:published_time' content='2021-08-05T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2021-08-05T00:00:00&#43;00:00'/>
+<meta name="twitter:title" content="使用 Rust EDP 撰寫 Intel SGX 程式">
+<meta name="twitter:description" content="前言 Intel Software Guard Extensions(Intel SGX) 提供以硬體為基礎的可信執行環境，與 ARM TrustZone 類似，可在記憶體內隔離特定的應用程式碼與資料，保護隱密資料不會被惡意程式攻擊或竊取。 它允許用戶於記憶體中建立私有區域，稱為「指定位址空間」(enclave)，程式碼可於 enclave 中執行， 與其他運行在相同或更高權限級別的程式有效隔離。
+Intel SGX &amp;amp; Enclave Intel SGX 為於 x86 實作 enclave 的 instruction set extension。 Enclave 為程式提供了一個安全的執行環境，不受外界干擾。 該環境建立在三個關鍵點上：
+Fully isolated execution 通常在執行程式時，會有大量程式比你的程式擁有更多的特權：像是作業系統等等。他們可以從記憶體中讀取 secret，在其他機器上創建你的程式的副本，並修改你的程式的工作方式。 而在 enclave 中運行的程式與系統的其餘部分完全隔離。一旦 enclave 被加載，保存在 enclave 中的程式和數據就不會被修改，初始記憶體內容代表 enclave 的身份(identity)，如果更改 enclave 的程式，其身份也會更改。
+使用 Intel SGX 的應用程式會分為兩個部分：
+可信部分（Trusted component）：也就是 enclave。 不受信任部分（Untrusted component）：這是應用程式的其餘部分及其任何模塊。從 enclave 的角度來看，OS 和 VMM 被視為不受信任的部分。 Sealing 資料並不會永久的儲存在 enclave 中。 Sealing 為將數據加密的過程，以便將數據儲存在不受信任的地方。 Enclave 會獲得和自己身份和 CPU 相關的密鑰，此密鑰稱為密封密鑰（sealing key)，它可用於加密數據（sealed blob），以後在完全相同的 CPU 上運行的完全相同的 enclave 程式就能解密數據。">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "dark");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/wanhsin_hu366a5cf9d6ed6a7819b52901816f26e5_1994279_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🐱</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">A</a></h1>
+            <h2 class="site-description">Fat Cat</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/about/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+                <li id="i18n-switch">  
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
+                        
+                            <option value="https://ashirleyshe.github.io/" selected>English</option>
+                        
+                            <option value="https://ashirleyshe.github.io/zh-tw/" >繁體中文</option>
+                        
+                    </select>
+                </li>
+            
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>Dark Mode</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+<main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/tech/" >
+                Tech
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E4%BD%BF%E7%94%A8-rust-edp-%E6%92%B0%E5%AF%AB-intel-sgx-%E7%A8%8B%E5%BC%8F/">使用 Rust EDP 撰寫 Intel SGX 程式</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Aug 05, 2021</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    3 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="前言">前言</h2>
+<p>Intel Software Guard Extensions(Intel SGX) 提供以硬體為基礎的可信執行環境，與 ARM TrustZone 類似，可在記憶體內隔離特定的應用程式碼與資料，保護隱密資料不會被惡意程式攻擊或竊取。
+它允許用戶於記憶體中建立私有區域，稱為「指定位址空間」(enclave)，程式碼可於 enclave 中執行，
+與其他運行在相同或更高權限級別的程式有效隔離。</p>
+<h2 id="intel-sgx--enclave">Intel SGX &amp; Enclave</h2>
+<p>Intel SGX 為於 x86 實作 enclave 的 instruction set extension。
+Enclave 為程式提供了一個安全的執行環境，不受外界干擾。
+該環境建立在三個關鍵點上：</p>
+<h3 id="fully-isolated-execution">Fully isolated execution</h3>
+<p>通常在執行程式時，會有大量程式比你的程式擁有更多的特權：像是作業系統等等。他們可以從記憶體中讀取 secret，在其他機器上創建你的程式的副本，並修改你的程式的工作方式。
+而在 enclave 中運行的程式與系統的其餘部分完全隔離。一旦 enclave 被加載，保存在 enclave 中的程式和數據就不會被修改，初始記憶體內容代表 enclave 的身份(identity)，如果更改 enclave 的程式，其身份也會更改。</p>
+<p>使用 Intel SGX 的應用程式會分為兩個部分：</p>
+<ul>
+<li>可信部分（Trusted component）：也就是 enclave。</li>
+<li>不受信任部分（Untrusted component）：這是應用程式的其餘部分及其任何模塊。從 enclave 的角度來看，OS 和 VMM 被視為不受信任的部分。</li>
+</ul>
+<h3 id="sealing">Sealing</h3>
+<p>資料並不會永久的儲存在 enclave 中。
+Sealing 為將數據加密的過程，以便將數據儲存在不受信任的地方。
+Enclave 會獲得和自己身份和 CPU 相關的密鑰，此密鑰稱為密封密鑰（sealing key)，它可用於加密數據（sealed blob），以後在完全相同的 CPU 上運行的完全相同的 enclave 程式就能解密數據。</p>
+<p>若程式改變，身份會改變，sealing key 也會不同。
+如果程式運行在不同的 CPU 上，sealing key 也會不同。</p>
+<ul>
+<li><a class="link" href="https://edp.fortanix.com/docs/examples/sealing/"  target="_blank" rel="noopener"
+    >Example: Obtaining a sealing key</a></li>
+</ul>
+<h3 id="remote-attestation">Remote attestation</h3>
+<p>遠端證明用來確定遠端系統完整性，確定其是否可信。在 SGX 中，enclave 可以使用遠端證明提供其身份及其執行環境的證明，表示硬體有確實使用 SGX 執行特定的 enclave。該證明為由 CPU 使用其私鑰簽署的數位簽章，此私鑰只能用於遠端證明，並可以使用公鑰驗證簽名。</p>
+<p>Attesatation 也有 local attestation，即為在同一機器兩個 enclave 互相認證的過程。</p>
+<ul>
+<li><a class="link" href="https://edp.fortanix.com/docs/examples/attestation/"  target="_blank" rel="noopener"
+    >Example: Local attestation</a></li>
+</ul>
+<h2 id="rust-edp">Rust EDP</h2>
+<p>選擇 <a class="link" href="https://edp.fortanix.com"  target="_blank" rel="noopener"
+    >Rust EDP</a> 來寫 SGX 程式還是因為寫起來比較親民，否則需要寫可信區跟不可信區的程式，好麻煩&hellip;</p>
+<h3 id="installation">Installation</h3>
+<p>先看一下 CPU 能不能支援 Intel SGX:
+<a class="link" href="https://www.intel.com.tw/content/www/tw/zh/support/articles/000028173/processors/intel-core-processors.html"  target="_blank" rel="noopener"
+    >如何知道我的 Intel® 處理器是否支援 Intel® Software Guard Extensions （Intel® SGX）</a></p>
+<ul>
+<li>環境 Ubuntu 18.04</li>
+</ul>
+<h4 id="install-rust">Install Rust</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">curl --proto &#39;=https&#39; --tlsv1.2 -sSf https://sh.rustup.rs | sh
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">1) Proceed with installation (default)
+</span></span><span class="line"><span class="cl">2) Customize installation
+</span></span><span class="line"><span class="cl">3) Cancel installation
+</span></span><span class="line"><span class="cl">&gt;2
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">Default toolchain? (stable/beta/nightly/none)
+</span></span><span class="line"><span class="cl">nightly
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="install-nightly-toolchain">Install nightly toolchain</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">rustup default nightly
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="install-edp-components">Install EDP components</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">rustup target add x86_64-fortanix-unknown-sgx --toolchain nightly 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="install-sgx-driver">Install SGX driver</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">echo &#34;deb https://download.fortanix.com/linux/apt xenial main&#34; | sudo tee -a /etc/apt/sources.list.d/fortanix.list &gt;/dev/null curl -sSL &#34;https://download.fortanix.com/linux/apt/fortanix.gpg&#34; | sudo -E apt-key add 
+</span></span><span class="line"><span class="cl">sudo apt-get update 
+</span></span><span class="line"><span class="cl">sudo apt-get install intel-sgx-dkms
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="install-aesm-service">Install AESM service</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">echo &#34;deb https://download.01.org/intel-sgx/sgx_repo/ubuntu $(lsb_release -cs) main&#34; | sudo tee -a /etc/apt/sources.list.d/intel-sgx.list &gt;/dev/null curl -sSL &#34;https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key&#34; | sudo -E apt-key add 
+</span></span><span class="line"><span class="cl">sudo apt-get update 
+</span></span><span class="line"><span class="cl">sudo apt-get install sgx-aesm-service libsgx-aesm-launch-plugin
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="install-fortanix-edp-utilities">Install Fortanix EDP utilities</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo apt-get install pkg-config libssl-dev protobuf-compiler
+</span></span><span class="line"><span class="cl">cargo install fortanix-sgx-tools sgxs-tools
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="configure-cargo-integration-with-fortanix-edp">Configure Cargo integration with Fortanix EDP</h4>
+<p>Create <code>.cargo</code> directory with config file in it, in your <code>$HOME</code> directory with the following content:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">[target.x86_64-fortanix-unknown-sgx] 
+</span></span><span class="line"><span class="cl">runner = &#34;ftxsgx-runner-cargo&#34;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="check-your-sgx-setup">Check your SGX setup</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sgx-detect  
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><img src="https://i.imgur.com/qnk5ME7.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<h3 id="run-your-enclave">Run your enclave!</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">cargo new --bin hello-world 
+</span></span><span class="line"><span class="cl">cd hello-world 
+</span></span><span class="line"><span class="cl">cargo run --target x86_64-fortanix-unknown-sgx 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>就像寫一般的 Rust 程式，只差別在 Running 時候的指令。</p>
+<h4 id="目錄結構">目錄結構</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">hello-world/
+</span></span><span class="line"><span class="cl">├── Cargo.lock
+</span></span><span class="line"><span class="cl">├── Cargo.toml      # 套件管理
+</span></span><span class="line"><span class="cl">├── src
+</span></span><span class="line"><span class="cl">│   └── main.rs     # 你的程式
+</span></span><span class="line"><span class="cl">└── target
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="architecture">Architecture</h3>
+<p>EDP 提供了介面去啟動 enclave 並由 encalve 取得輸出。
+<img src="https://edp.fortanix.com/img/docs/edp-architecture.svg"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p><code>enclave-runner</code> 負責加載 enclave。</p>
+<p><code>ftxsgx-runner</code> 是基於 <code>enclave-runner</code> 的執行檔，也可以自己寫。</p>
+<h3 id="deployment">Deployment</h3>
+<p>我們需要將執行檔轉換成 <code>.sgxs</code> 的格式，因為編譯器沒辦法直接輸出 <code>.sgxs</code> ，所以先編譯再轉換過去。</p>
+<h4 id="build">Build</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">cargo build --target x86_64-fortanix-unknown-sgx
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="sgxs-conversion">SGXS conversion</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">ftxsgx-elf2sgxs myapp --heap-size 0x20000 --stack-size 0x20000 --threads 10 --debug
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>要特別注意 stack size 以及 heap size 的調整。
+如果大小給太小可能會導致 enclave 停止運行：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Error while executing SGX enclave.
+</span></span><span class="line"><span class="cl">Enclave panicked: memory allocation of 590032 bytes failed
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>但如果大小給太大也會增加 enclave 載入時間，降低效率。</p>
+<h4 id="sign">Sign</h4>
+<p>enclave 在執行前是必需要被簽名的。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># 使用 OpenSSL 產生 signing key:
+</span></span><span class="line"><span class="cl">openssl genrsa -3 3072 &gt; my_key.pem
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># To sign an enclave using sgxs-sign
+</span></span><span class="line"><span class="cl">sgxs-sign --key my_key.pem myapp.sgxs myapp.sig -d --xfrm 7/0 --isvprodid 0 --isvsvn 0
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="run">Run</h4>
+<p>每個 encalve 都需要一個 <code>runner</code> 去執行它，預設使用 <code>ftxsgx-runner</code>。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">ftxsgx-runner myapp.sgxs
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>簽名放在與 <code>.sgxs</code> 同個資料夾即可，若無也會生成假的簽名。</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>還是有很多細節還沒看，還有也還沒探討到爆出的一些漏洞、安全性問題。
+將研究加入 Intel SGX 是有很多種可能性的:</p>
+<ul>
+<li>私鑰管理：使用 enclave 管理私鑰</li>
+<li>與區塊鏈結合：提高區塊鏈應用的安全性</li>
+<li>電子硬體錢包：在更安全的環境中執行虛擬貨幣交易</li>
+<li>多方計算(Multiparty computation)</li>
+<li>IoT：提升通訊安全</li>
+</ul>
+<h2 id="reference">Reference</h2>
+<ul>
+<li><a class="link" href="https://github.com/fortanix/rust-sgx"  target="_blank" rel="noopener"
+    >Fortanix Rust Enclave Development Platform (github)</a></li>
+<li><a class="link" href="https://edp.fortanix.com"  target="_blank" rel="noopener"
+    >Fortanix Rust Enclave Development Platform | Rust EDP</a></li>
+<li><a class="link" href="https://software.intel.com/content/www/us/en/develop/topics/software-guard-extensions.html"  target="_blank" rel="noopener"
+    >Intel® Software Guard Extensions</a></li>
+<li><a class="link" href="https://blog.quarkslab.com/overview-of-intel-sgx-part-1-sgx-internals.html"  target="_blank" rel="noopener"
+    >Overview of Intel SGX</a></li>
+</ul>
+<p><img src="https://stickershop.line-scdn.net/stickershop/v1/product/1976/LINEStorePC/main.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/sgx/">sgx</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/github-notes/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Github Notes</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/my-mac-settings/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">My Mac Settings</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/the-graph-%E5%8D%80%E5%A1%8A%E9%8F%88%E6%95%B8%E6%93%9A%E7%B4%A2%E5%BC%95%E5%8D%94%E8%AD%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">The graph - 區塊鏈數據索引協議</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/hugo-quick-start/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Hugo Quick Start</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "ashley-10" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2023 A
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.13.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#前言">前言</a></li>
+    <li><a href="#intel-sgx--enclave">Intel SGX &amp; Enclave</a>
+      <ol>
+        <li><a href="#fully-isolated-execution">Fully isolated execution</a></li>
+        <li><a href="#sealing">Sealing</a></li>
+        <li><a href="#remote-attestation">Remote attestation</a></li>
+      </ol>
+    </li>
+    <li><a href="#rust-edp">Rust EDP</a>
+      <ol>
+        <li><a href="#installation">Installation</a>
+          <ol>
+            <li><a href="#install-rust">Install Rust</a></li>
+            <li><a href="#install-nightly-toolchain">Install nightly toolchain</a></li>
+            <li><a href="#install-edp-components">Install EDP components</a></li>
+            <li><a href="#install-sgx-driver">Install SGX driver</a></li>
+            <li><a href="#install-aesm-service">Install AESM service</a></li>
+            <li><a href="#install-fortanix-edp-utilities">Install Fortanix EDP utilities</a></li>
+            <li><a href="#configure-cargo-integration-with-fortanix-edp">Configure Cargo integration with Fortanix EDP</a></li>
+            <li><a href="#check-your-sgx-setup">Check your SGX setup</a></li>
+          </ol>
+        </li>
+        <li><a href="#run-your-enclave">Run your enclave!</a>
+          <ol>
+            <li><a href="#目錄結構">目錄結構</a></li>
+          </ol>
+        </li>
+        <li><a href="#architecture">Architecture</a></li>
+        <li><a href="#deployment">Deployment</a>
+          <ol>
+            <li><a href="#build">Build</a></li>
+            <li><a href="#sgxs-conversion">SGXS conversion</a></li>
+            <li><a href="#sign">Sign</a></li>
+            <li><a href="#run">Run</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#conclusion">Conclusion</a></li>
+    <li><a href="#reference">Reference</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

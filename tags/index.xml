@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Tags on A</title>
+        <link>https://ashirleyshe.github.io/tags/</link>
+        <description>Recent content in Tags on A</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en</language>
+        <lastBuildDate>Wed, 29 Nov 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://ashirleyshe.github.io/tags/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Aptos</title>
+        <link>https://ashirleyshe.github.io/tags/aptos/</link>
+        <pubDate>Wed, 29 Nov 2023 00:00:00 +0000</pubDate>
+        
+        <guid>https://ashirleyshe.github.io/tags/aptos/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>foundry</title>
+        <link>https://ashirleyshe.github.io/tags/foundry/</link>
+        <pubDate>Thu, 28 Sep 2023 00:00:00 +0000</pubDate>
+        
+        <guid>https://ashirleyshe.github.io/tags/foundry/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Vyper</title>
+        <link>https://ashirleyshe.github.io/tags/vyper/</link>
+        <pubDate>Tue, 26 Sep 2023 00:00:00 +0000</pubDate>
+        
+        <guid>https://ashirleyshe.github.io/tags/vyper/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>CTF</title>
+        <link>https://ashirleyshe.github.io/tags/ctf/</link>
+        <pubDate>Mon, 18 Sep 2023 00:00:00 +0000</pubDate>
+        
+        <guid>https://ashirleyshe.github.io/tags/ctf/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Defi</title>
+        <link>https://ashirleyshe.github.io/tags/defi/</link>
+        <pubDate>Wed, 08 Mar 2023 00:00:00 +0000</pubDate>
+        
+        <guid>https://ashirleyshe.github.io/tags/defi/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>GitHub</title>
+        <link>https://ashirleyshe.github.io/tags/github/</link>
+        <pubDate>Mon, 03 Oct 2022 00:00:00 +0000</pubDate>
+        
+        <guid>https://ashirleyshe.github.io/tags/github/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Blockchain</title>
+        <link>https://ashirleyshe.github.io/tags/blockchain/</link>
+        <pubDate>Fri, 30 Sep 2022 00:00:00 +0000</pubDate>
+        
+        <guid>https://ashirleyshe.github.io/tags/blockchain/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>mac</title>
+        <link>https://ashirleyshe.github.io/tags/mac/</link>
+        <pubDate>Mon, 26 Sep 2022 00:00:00 +0000</pubDate>
+        
+        <guid>https://ashirleyshe.github.io/tags/mac/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>ethernaut</title>
+        <link>https://ashirleyshe.github.io/tags/ethernaut/</link>
+        <pubDate>Fri, 26 Aug 2022 00:00:00 +0000</pubDate>
+        
+        <guid>https://ashirleyshe.github.io/tags/ethernaut/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Solidity</title>
+        <link>https://ashirleyshe.github.io/tags/solidity/</link>
+        <pubDate>Fri, 26 Aug 2022 00:00:00 +0000</pubDate>
+        
+        <guid>https://ashirleyshe.github.io/tags/solidity/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>graph node</title>
+        <link>https://ashirleyshe.github.io/tags/graph-node/</link>
+        <pubDate>Mon, 20 Jun 2022 00:00:00 +0000</pubDate>
+        
+        <guid>https://ashirleyshe.github.io/tags/graph-node/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>subgraph</title>
+        <link>https://ashirleyshe.github.io/tags/subgraph/</link>
+        <pubDate>Mon, 20 Jun 2022 00:00:00 +0000</pubDate>
+        
+        <guid>https://ashirleyshe.github.io/tags/subgraph/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>the graph</title>
+        <link>https://ashirleyshe.github.io/tags/the-graph/</link>
+        <pubDate>Mon, 20 Jun 2022 00:00:00 +0000</pubDate>
+        
+        <guid>https://ashirleyshe.github.io/tags/the-graph/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Hugo</title>
+        <link>https://ashirleyshe.github.io/tags/hugo/</link>
+        <pubDate>Fri, 22 Oct 2021 00:00:00 +0000</pubDate>
+        
+        <guid>https://ashirleyshe.github.io/tags/hugo/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>sgx</title>
+        <link>https://ashirleyshe.github.io/tags/sgx/</link>
+        <pubDate>Thu, 05 Aug 2021 00:00:00 +0000</pubDate>
+        
+        <guid>https://ashirleyshe.github.io/tags/sgx/</guid>
+        <description></description>
+        </item>
+        
+    </channel>
+</rss>

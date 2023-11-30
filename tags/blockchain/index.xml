@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Blockchain on A</title>
+        <link>https://ashirleyshe.github.io/tags/blockchain/</link>
+        <description>Recent content in Blockchain on A</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en</language>
+        <lastBuildDate>Fri, 30 Sep 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://ashirleyshe.github.io/tags/blockchain/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Blockchain Tools</title>
+        <link>https://ashirleyshe.github.io/p/blockchain-tools/</link>
+        <pubDate>Fri, 30 Sep 2022 00:00:00 +0000</pubDate>
+        
+        <guid>https://ashirleyshe.github.io/p/blockchain-tools/</guid>
+        <description>&lt;h2 id=&#34;transaction-decoder&#34;&gt;Transaction Decoder&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://ethtx.info&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;EthTx Transaction Decoder&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://tx.eth.samczsun.com/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Ethereum Transaction Viewer&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://phalcon.blocksec.com&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Phalcon&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://dashboard.tenderly.co/explorer&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Tenderly&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://blockchair.com/zh&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;blockchair&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;solidity-decompiler&#34;&gt;Solidity Decompiler&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://ethervm.io/decompile&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;ethervm&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://library.dedaub.com/decompile&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;dedaub&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;others&#34;&gt;Others&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://tools.deth.net/eth-unit-conversion&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;deth tools&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://eth-toolbox.com&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;EthToolbox&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://sig.eth.samczsun.com&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Ethereum Signature Database&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.evm.codes&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;evm codes&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.unixtimestamp.com&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;unix timestamp&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

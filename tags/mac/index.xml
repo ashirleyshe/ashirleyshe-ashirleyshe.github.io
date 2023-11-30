@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>mac on A</title>
+        <link>https://ashirleyshe.github.io/tags/mac/</link>
+        <description>Recent content in mac on A</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en</language>
+        <lastBuildDate>Mon, 26 Sep 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://ashirleyshe.github.io/tags/mac/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>My Mac Settings</title>
+        <link>https://ashirleyshe.github.io/p/my-mac-settings/</link>
+        <pubDate>Mon, 26 Sep 2022 00:00:00 +0000</pubDate>
+        
+        <guid>https://ashirleyshe.github.io/p/my-mac-settings/</guid>
+        <description>&lt;h2 id=&#34;settings&#34;&gt;Settings&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://support.apple.com/zh-tw/HT204609&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;三指拖曳&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;app&#34;&gt;App&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://brew.sh/index_zh-tw&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Homebrew&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://iterm2.com&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;iTerm2&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://ohmyz.sh&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;oh my zsh&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.spectacleapp.com&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Spectable&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://code.visualstudio.com&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;vs code&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;tips&#34;&gt;Tips&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/git/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;oh my zsh git alias&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;env&#34;&gt;Env&lt;/h2&gt;
+&lt;h3 id=&#34;zsh-command-not-found-code&#34;&gt;zsh: command not found: code&lt;/h3&gt;
+&lt;p&gt;在 vs code 中 &lt;code&gt;F1&lt;/code&gt; -&amp;gt; &lt;code&gt;&amp;gt;shell command: install &#39;code&#39; command in PATH&lt;/code&gt;&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>
